@@ -26,12 +26,14 @@ Start -> Coffee Shop -> ATM -> Library -> End
 But others may not: 
 
 Start -> ATM -> Coffee Shop -> Library -> End
+
 Start -> ATM -> Library -> Coffee Shop -> End
 
 Additionally, the presence of multiple options (in a spatial sense) for each
 waypoint adds another dimension of complexity to the problem! Which is better? 
 
 Start -> ATM(1) -> Coffee Shop -> Library -> End
+
 Start -> ATM(2) -> Coffee Shop -> Library -> End
 
 
