@@ -8,10 +8,20 @@
 	(x, y, z) point in space
 '''
 class Point:
-	def __init__(self, x=0, y=0, z=0):
-		self.x = x
-		self.y = y
-		self.z = z
+	def __init__(self, *args):
+		if len(args) < 2 or len(args) > 3:
+			raise Exception("Points only accept 2D or 3D")
+		for i in range(0, len(args)):
+			if type(args[i]) != int:
+				raise Exception("Point only takes in integers as arguments")
+		 
+		self.x = args[0]
+		self.y = args[1]
+		
+		if(len(args) == 3):
+			self.z = args[2]
+		else:
+			self.z = None
 	
 	'''Enables equivalence checking (i.e. == and != comparison of Point objects)'''
 	def __eq__(self, other):
@@ -22,11 +32,11 @@ class Point:
 	
 	''' Enables human readable object representation '''
 	def __str__(self):
-		pos = (self.x, self.y, self.z)
+		pos = (self.x, self.y, self.z) if self.z != None else (self.x, self.y)
 		return str(pos)
 
 	def __repr__(self):
-		pos = (self.x, self.y, self.z)
+		pos = (self.x, self.y, self.z) if self.z != None else (self.x, self.y)
 		return str(pos)
 
 
@@ -60,14 +70,13 @@ class Waypoint:
 			raise Exception("Waypoints only take a Point, tuple or integers for position\n")
 		
 		#Allow for multiple types of input(Point, tuple, or seperate numbers)
+
 		if type(args[i]) == Point:
 			self.position = args[i]
 		else:
 			#Convert coordinate input to list
-			pos = list(args if type(args[i]) == int else args[i])
-			if dim == 2: pos.append(0) 
-			self.position = Point(pos[0], pos[1], pos[2])
-
+			pos = list(args[i:] if type(args[i]) == int else args[i])
+			self.position = Point(pos[0], pos[1]) if dim == 2 else Point(pos[0], pos[1], pos[2]) 
 	
 	'''Enables equivalence checking (i.e. == and != comparison of Waypoint objects)'''
 	def __eq__(self, other):
@@ -105,10 +114,9 @@ class POI(Waypoint):
 		if (name == '' or type(name) != str):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a non-empty name of type str\n")
-		#TODO(SLatychev) Decide if we will define a Location class or simply use non-empty strings
 		if (type(location) != Location or location.locType == ''):
 			eCount += 1
-			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type str\n")
+			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Location\n")
 		if eCount > 0:
 			eCount = 0
 			raise Exception(eMsg)
@@ -116,7 +124,7 @@ class POI(Waypoint):
 		Waypoint.__init__(self, name, *args)
 		#TODO(SLatychev): Need to add location type checking so that this class 
 		#is consistent description: "... taken from a standardized database..."
-		self.locationType = locationType
+		self.location = location
 	
 	'''Enables equivalence checking (i.e. == and != comparison of POI objects)'''	
 	def __eq__(self, other):
@@ -127,11 +135,11 @@ class POI(Waypoint):
 
 	''' Enables human readable object representation '''
 	def __str__(self):
-		poi = self.name + " | " + self.locationType + " | " + str(self.position)
+		poi = self.name + " | " + str(self.location) + " | " + str(self.position)
 		return poi
 		
 	def __repr__(self):
-		poi = self.name + " | " + self.locationType + " | " + str(self.position)
+		poi = self.name + " | " + str(self.location) + " | " + str(self.position)
 		return poi
 
 
@@ -140,11 +148,18 @@ class Location:
 		self.locType = locType
 		self.description = desc
 		
+	''' Enables equivalence checking (i.e. == and != comparison of Location objects)'''
 	def __eq__(self, other):
-		return self.locType == other.locType and self.description = other.description
+		return self.locType == other.locType and self.description == other.description
 		
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
+		
+	def __str__(self):
+		return self.locType
+	
+	def __repr__(self):
+		return self.locType + "\n" + self.description
 
 #TODO(SLatychev): Decide on the following:
 #	a) 	Do we want to build a Path class, that will store particular Waypoints along a path
