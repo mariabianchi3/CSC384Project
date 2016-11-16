@@ -159,12 +159,24 @@ class Location:
 #				built we build a path of actual waypoints based on the search algorithm, then can 
 #				do some fancy things with the path object
 #				=> cspbase needs no code modifications at all
+#
+#		NOTE(SLatychev): Changing this to Node class
+#							-LocationTypes
+#							-LocationPositions
+#							-NodeScore
+#						=>A Node will be created when the user specifies a list
+#							of location types they want to visit
+#						=>Mutation alg will then modify the Initial and subsequently
+#							mutated nodes
+#						=>Node score will be determined later by the search
 #		
 #	b)	Do we want to build a Database class, that can organize waypoints and perform
 #		specialized functions on them and on the database of them like:
 #			-Extract all Waypoints of type blah
 #			-Extract all Waypoints of type blah with name bleh
-#			-Extract all Waypoints that have non unique positions (i.e. find me a mall) 
+#			-Extract all Waypoints that have non unique positions (i.e. find me a mall)
+#		
+#		NOTE(SLatychev): Database built, need to build function for non-unique position extraction
 #
 #
 #
