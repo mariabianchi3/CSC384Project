@@ -93,7 +93,7 @@ class Waypoint:
 	Station are POIs)
 '''
 class POI(Waypoint):
-	def __init__(self, name, locationType, *args):
+	def __init__(self, name, location, *args):
 		'''
 		@param name: POI name (from super, cannot be empty string)
 		@param position: POI (x,y,z) coordinates (from super)
@@ -106,7 +106,7 @@ class POI(Waypoint):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a non-empty name of type str\n")
 		#TODO(SLatychev) Decide if we will define a Location class or simply use non-empty strings
-		if (locationType == '' or type(locationType) != str):
+		if (type(location) != Location or location.locType == ''):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type str\n")
 		if eCount > 0:
@@ -120,7 +120,7 @@ class POI(Waypoint):
 	
 	'''Enables equivalence checking (i.e. == and != comparison of POI objects)'''	
 	def __eq__(self, other):
-		return self.locationType == other.locationType and Waypoint.__eq__(self, other)
+		return self.location == other.location and Waypoint.__eq__(self, other)
 	
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
@@ -135,12 +135,19 @@ class POI(Waypoint):
 		return poi
 
 
+class Location:
+	def __init__(self, locType, desc=''):
+		self.locType = locType
+		self.description = desc
+		
+	def __eq__(self, other):
+		return self.locType == other.locType and self.description = other.description
+		
+	def __ne__(self, other):
+		return not self.__eq__(self, other)
 
 #TODO(SLatychev): Decide on the following:
-#	a) 	Do we want to build a Location class, that will contain Location Type and generic
-#		description?
-#	
-#	b) 	Do we want to build a Path class, that will store particular Waypoints along a path
+#	a) 	Do we want to build a Path class, that will store particular Waypoints along a path
 #			-This may reduce the difficulty of the search algorithm by allowing the creation and
 #			storage of an explicit Path object that can store a set of Waypoints, pathScore, and
 #			other relevant information.
@@ -153,7 +160,7 @@ class POI(Waypoint):
 #				do some fancy things with the path object
 #				=> cspbase needs no code modifications at all
 #		
-#	c)	Do we want to build a Database class, that can organize waypoints and perform
+#	b)	Do we want to build a Database class, that can organize waypoints and perform
 #		specialized functions on them and on the database of them like:
 #			-Extract all Waypoints of type blah
 #			-Extract all Waypoints of type blah with name bleh
