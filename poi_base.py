@@ -55,8 +55,7 @@ class Point:
 		return str(pos)
 
 	def __repr__(self):
-		pos = (self.x, self.y, self.z) if self.z != None else (self.x, self.y)
-		return str(pos)
+		return str(self)
 
 
 
@@ -117,8 +116,7 @@ class Waypoint:
 		return Waypoint
 		
 	def __repr__(self):
-		Waypoint = self.name + " | " + str(self.position)
-		return Waypoint
+		return str(self)
 
 
 
@@ -170,8 +168,7 @@ class POI(Waypoint):
 		return poi
 		
 	def __repr__(self):
-		poi = self.name + " | " + str(self.location) + " | " + str(self.position)
-		return poi
+		return str(self)
 
 
 
@@ -205,10 +202,10 @@ class Location:
 	
 	#Enables human readable object representation
 	def __str__(self):
-		return self.lType
+		return self.lType + "\n" + self.description
 	
 	def __repr__(self):
-		return self.lType + "\n" + self.description
+		return str(self)
 
 
 		
@@ -258,9 +255,47 @@ class Node:
 				"\nPath Score: " + str(self.score)
 	
 	def __repr__(self):
-		 return "Location Order: " + str(self.lType) + \
-				"\nLocation Coordinates: " + str(self.lPos) + \
-				"\nPath Score: " + str(self.score)
+		 return str(self)
 
 
-
+'''
+	Class:
+		Constraint
+	
+	Description:
+		A binary constraint for position of Location types in a node with an
+		immediate flag to indicate whether or not a location type must be
+		immediately or loosely before another location type
+	
+	Notes:
+		
+'''
+class Constraint:
+	def __init__(self, name, var1, var2, immediate = False):
+		self.name = name
+		self.var1 = var1
+		self.var2 = var2
+		self.immediate = immediate
+	
+	def getScope(self):
+		return list(self.var1, self.var2)
+	
+	def getConstraintStrength(self):
+		return "Strong" if self.immediate else "Weak"
+	
+	#Enables equivalence checking (i.e. == and != comparison of Node objects)
+	def __eq__(self, other):
+		return self.name == other.name and \
+				self.var1 == other.var1 and \
+				self.var2 == other.var2 and \
+				self.immediate == other.immediate
+	
+	def __ne__(self, other):
+		return not self.__eq__(self, other)
+	
+	#Enables human readable object representation
+	def __str__(self):
+		return "{" + str(self.var1) + ("}=={" if self.immediate else "}--{") + str(self.var2) + "}"
+	
+	def __repr__(self):
+		return str(self)
