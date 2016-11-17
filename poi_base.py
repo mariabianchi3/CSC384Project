@@ -5,10 +5,22 @@
 ###############################################################################
 
 '''
-	(x, y, z) point in space
+	Class:
+		Point
+	
+	Description:
+		A point in 2D or 3D space
+		
+	Notes:
+		
 '''
 class Point:
 	def __init__(self, *args):
+		'''
+		@param x: x coordinate
+		@param y: y coordinate
+		@param z: z coordinate
+		'''
 		if len(args) < 2 or len(args) > 3:
 			raise Exception("Points only accept 2D or 3D")
 		for i in range(0, len(args)):
@@ -42,7 +54,14 @@ class Point:
 
 
 '''
-	A Waypoint is a user defined location
+	Class:
+		Waypoint
+	
+	Description:
+		A Waypoint is a user defined location that has a name and a position
+	
+	Notes:
+		
 '''
 class Waypoint:
 	def __init__(self, *args):
@@ -97,9 +116,16 @@ class Waypoint:
 
 
 '''
-	A POI is a Waypoint with a name and location type taken from a standardized
-	database, (i.e. Starbucks/Tim's - Coffee Shop, St. George station - Subway 
-	Station are POIs)
+	Class:
+		POI
+		
+	Description:
+		A POI is a Waypoint with a name and location type taken from a standardized
+		database, (i.e. Starbucks/Tim's - Coffee Shop, St. George station - Subway 
+		Station are POIs)
+	
+	Notes:
+		
 '''
 class POI(Waypoint):
 	def __init__(self, name, location, *args):
@@ -114,7 +140,7 @@ class POI(Waypoint):
 		if (name == '' or type(name) != str):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a non-empty name of type str\n")
-		if (type(location) != Location or location.locType == ''):
+		if (type(location) != Location or location.lType == ''):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Location\n")
 		if eCount > 0:
@@ -143,57 +169,93 @@ class POI(Waypoint):
 		return poi
 
 
+
+'''
+	Class:
+		Location
+		
+	Description:
+		Formalizes what a location is into an object. It currently contains a 
+		type and description, but can be later extended to include other 
+		information.
+	
+	Notes:
+		
+'''
 class Location:
-	def __init__(self, locType, desc=''):
-		self.locType = locType
+	def __init__(self, lType, desc=''):
+		'''
+		@param lType: The type of the location (Coffee Shope, Library, etc.)
+		@param description: Generic description of location type (Optional)
+		'''
+		self.lType = lType
 		self.description = desc
 		
 	''' Enables equivalence checking (i.e. == and != comparison of Location objects)'''
 	def __eq__(self, other):
-		return self.locType == other.locType and self.description == other.description
+		return self.lType == other.lType and self.description == other.description
 		
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
-		
+	
+	''' Enables human readable object representation '''
 	def __str__(self):
-		return self.locType
+		return self.lType
 	
 	def __repr__(self):
-		return self.locType + "\n" + self.description
+		return self.lType + "\n" + self.description
 
-#TODO(SLatychev): Decide on the following:
-#	a) 	Do we want to build a Path class, that will store particular Waypoints along a path
-#			-This may reduce the difficulty of the search algorithm by allowing the creation and
-#			storage of an explicit Path object that can store a set of Waypoints, pathScore, and
-#			other relevant information.
-#
-#			-This may also minimize csp use to just checking location
-#			type constraints 
-#				=> CSP will simply keep as variables the location types, and the 
-#				constraints between them, once an appropriate ordering of location types has been 
-#				built we build a path of actual waypoints based on the search algorithm, then can 
-#				do some fancy things with the path object
-#				=> cspbase needs no code modifications at all
-#
-#		NOTE(SLatychev): Changing this to Node class
-#							-LocationTypes
-#							-LocationPositions
-#							-NodeScore
-#						=>A Node will be created when the user specifies a list
-#							of location types they want to visit
-#						=>Mutation alg will then modify the Initial and subsequently
-#							mutated nodes
-#						=>Node score will be determined later by the search
-#		
-#	b)	Do we want to build a Database class, that can organize waypoints and perform
-#		specialized functions on them and on the database of them like:
-#			-Extract all Waypoints of type blah
-#			-Extract all Waypoints of type blah with name bleh
-#			-Extract all Waypoints that have non unique positions (i.e. find me a mall)
-#		
-#		NOTE(SLatychev): Database built, need to build function for non-unique position extraction
-#
-#
-#
+
+		
+'''
+	Class:
+		Node
+	
+	Description:
+		Node is a container for a user defined path that contains location types
+		the user wants to visit along with a possible configuration of coordinates
+		where those location types are on a map.
+	
+	Notes:
+		1 - Nodes should be created using the Database as it will contain all
+		data relating a location type with all possible positions where that 
+		location type is found on the map.
+		
+		2 - Node will be mutated by the simulated annealing algo by either 
+		swaping locations' indices or changing the coordinate position of 
+		the location.  
+		
+'''
+class Node:
+	def __init__(self, lType, lPos):
+		'''
+		@param lType: A list containing Location types
+		@param lPos: A list containing the Location types' positions
+		@param score: A score for the arrangement of the path
+		'''
+		self.lType = lType
+		self.lPos = lPos
+		self.score = -1
+	
+	''' Enables equivalence checking (i.e. == and != comparison of Node objects)'''
+	def __eq__(self, other):
+		return self.lType == other.lType and \
+				self.lPos == other.lPos and \
+				self.score == other.score
+	
+	def __ne__(self, other):
+		return not self.__eq__(self, other)
+	
+	''' Enables human readable object representation '''
+	def __str__(self):
+		return "Location Order: " + str(self.lType) + \
+				"\nLocation Coordinates: " + str(self.lPos) + \
+				"\nPath Score: " + str(self.score)
+	
+	def __repr__(self):
+		 return "Location Order: " + str(self.lType) + \
+				"\nLocation Coordinates: " + str(self.lPos) + \
+				"\nPath Score: " + str(self.score)
+
 
 
