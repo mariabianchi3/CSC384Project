@@ -14,15 +14,13 @@ def randomMutation(table,node, p = 0.5):
 	m1_node = copy.deepcopy(node)
 	m2_node = copy.deepcopy(node)
 	
+	m1_node = type1Mutation(m1_node)
+	m2_node = type2Mutation(m2_node)
+	
 	#Choose which mutated node by weighted randomization of p
 	mutations = list(m1_node, m2_node)
 	probabilities = list(p, 1-p)
-	mutation = np.random.choice(mutations, 1, probabilities)
-	
-	if mutation == m1_node:
-		return type1Mutation(m1_node)
-	else:
-		return type2Mutation(m2_node)
+	return np.random.choice(mutations, 1, probabilities)
 	
 #TYPE 1 MUTATION
 def type1Mutation(m1_node):
