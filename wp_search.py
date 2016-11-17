@@ -14,7 +14,7 @@ from search import *
 
 class WaypointMapState(StateSpace):
 
-    def __init__(self, action, gval, parent, width, height, cur_pos, des_pos, POI, obstacles):
+    def __init__(self, action, gval, parent, width, height, cur_pos, des_pos, table, obstacles):
         '''
         Creates a new Waypoint Map state.
         @param width: The map X dimension.
@@ -29,7 +29,7 @@ class WaypointMapState(StateSpace):
         self.height = height
         self.cur_pos = cur_pos
         self.des_pos = des_pos
-        self.POI = POI
+        self.table = table
         self.obstacles = obstacles    
 
     def successors(self):

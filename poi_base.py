@@ -37,10 +37,10 @@ class Point:
 	
 	#Conversion functions for other functions that do not take in Point objects
 	def toTuple(self):
-		return tuple(self.x, self.y) if self.z == None else tuple(self.x, self.y, self.z)
+		return tuple((self.x, self.y)) if self.z == None else tuple((self.x, self.y, self.z))
 	
 	def toList(self):
-		return list(self.x, self.y) if self.z == None else list(self.x, self.y, self.z)
+		return list((self.x, self.y)) if self.z == None else list((self.x, self.y, self.z))
 	
 	#Enables equivalence checking (i.e. == and != comparison of Point objects)
 	def __eq__(self, other):
@@ -84,7 +84,7 @@ class Waypoint:
 		
 		#Create position index and dim count
 		i = (0, 1)[type(args[0]) == str]
-		dim = len(args[i:] if type(args[i]) == int else args[i])
+		dim = len(args[i:] if type(args[i]) == int else args[i].toTuple())
 		
 		#Exception handling			
 		if (type(args[0]) == str or type(args[i]) == int or type(args[i]) == tuple):
@@ -185,17 +185,20 @@ class POI(Waypoint):
 		
 '''
 class Location:
-	def __init__(self, lType, desc=''):
+	def __init__(self, lType, code, desc=''):
 		'''
 		@param lType: The type of the location (Coffee Shope, Library, etc.)
 		@param description: Generic description of location type (Optional)
 		'''
 		self.lType = lType
+		self.code = code
 		self.description = desc
-		
+	
 	#Enables equivalence checking (i.e. == and != comparison of Location objects)
 	def __eq__(self, other):
-		return self.lType == other.lType and self.description == other.description
+		return self.lType == other.lType and \
+		self.description == other.description and \
+		self.code == other.code
 		
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
