@@ -1,5 +1,3 @@
-import random
-import copy
 from collections import OrderedDict
 
 '''
@@ -59,7 +57,7 @@ class Table:
 		else:
 			print("Could not remove, the value does not exist")
 
-	#String representation of the Table
+	#Enables human readable object representation
 	def __str__(self):
 		tableOutput = self.name + " Table\n"
 		pData = list(self.data.keys()) + list(self.data.values())
@@ -82,7 +80,6 @@ class Table:
 		
 		return tableOutput
 
-	#Representation of the Table (Placeholder)
 	def __repr__(self):
 		return str(self)
 
@@ -106,7 +103,7 @@ class Table:
 		as a field of self.
 		
 	Credits:
-		- Alex Martelli's Borg:
+		- Alex Martelli's Borg Design Pattern:
 			Found a similar principle that instead of defaulting an optional 
 			parameter to a mutable type, a "private" (by convention) variable 
 			is made, that is of mutable type, and is assigned as a field of self. 
@@ -163,14 +160,13 @@ class Database:
 		
 		return allKeys
 
-	#String representation of the Database
+	#Enables human readable object representation
 	def __str__(self):
 		final = ""
 		for key, value in self.tables.items():
 			final += (str(value)) + "\n"
 		return final
 
-	#Representation of the Database (Placeholder)
 	def __repr__(self):
 		return str(self)
 
