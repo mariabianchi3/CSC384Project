@@ -33,14 +33,16 @@ def type1Mutation(m1_node):
 	if len(m1_node.lType) > 1:
 		#Get 2 random indices
 		ind_swap = random.sample(range(0, len(list(m1_node.lType)) - 1), 2)
+		 if m1_node.lPos[ind_swap[0]] != m1_node.lPod[ind_swap[1]]:
+			#Swap the node's location types
+			m1_node.lType[ind_swap[0]], m1_node.lType[ind_swap[1]] = \
+			m1_node.lType[ind_swap[1]], m1_node.lType[ind_swap[0]]
 	
-		#Swap the node's location types
-		m1_node.lType[ind_swap[0]], m1_node.lType[ind_swap[1]] = \
-		m1_node.lType[ind_swap[1]], m1_node.lType[ind_swap[0]]
-	
-		#Swap the node's location positions
-		m1_node.lPos[ind_swap[0]], m1_node.lPos[ind_swap[1]] = \
-		m1_node.lPos[ind_swap[1]], m1_node.lPos[ind_swap[0]]
+			#Swap the node's location positions
+			m1_node.lPos[ind_swap[0]], m1_node.lPos[ind_swap[1]] = \
+			m1_node.lPos[ind_swap[1]], m1_node.lPos[ind_swap[0]]
+		else:
+			raise Exception("Chosen positions for swapping have the same position")
 	else:
 		raise Exception("No possible mutations")
 		
