@@ -35,7 +35,7 @@ class Point:
 		else:
 			self.z = None
 	
-	#Conversion functions
+	#Conversion functions for other functions that do not take in Point objects
 	def toTuple(self):
 		return tuple(self.x, self.y) if self.z == None else tuple(self.x, self.y, self.z)
 	
