@@ -5,6 +5,7 @@ import numpy as np
 from poi_base import *
 from poiDB import *
 from wp_search import *
+from wp_search_helpers import *
 
 #Mutates the node to either a type 1 with probability p and type 2 with probability 1-p
 def randomMutation(table,node, p = 0.5):
@@ -76,7 +77,7 @@ def type2Mutation(table, m2_node):
 #Makes a Node object from a user specified path and the appropriate table in the database
 def makeNode(table, locationTypePath):
 	nodeTypes = locationTypePath
-	nodePoses = [table.data[poi_type][0] for poi_type in nodeTypes]
+	nodePoses = [table.data[poi_type.code][0].position.toTuple() for poi_type in nodeTypes]
 	newNode = Node(nodeTypes, nodePoses)
 	return newNode
 
@@ -107,9 +108,24 @@ if __name__ == "__main__":
 	DB.tables["poiTab"].addValToKey(C.code, C3)
 	DB.tables["poiTab"].addValToKey(L.code, L1)
 	
-	wp_map = WaypointMapState("START", 0, None, 5, 5, # Dimensions
-                     (0,0), # Initial Position 
-                     (4,4), # Desired Position 
-                     DB.tables["poiTab"], # Dict of POI... Needs thinking about...
-                     frozenset(((2,4),(3,3))) # Obstacles
-                    )
+	wp_map = WaypointMapState("START", 0, None, 10, 10, # Dimensions
+					 (0,0), # Initial Position 
+					 (6,9), # Desired Position 
+					 DB.tables["poiTab"], # Dict of POI... Needs thinking about...
+					 #frozenset(((2,4),(3,3))) # Obstacles
+					 frozenset(())
+					)
+
+	table = DB.tables["poiTab"]
+
+	wp_map.print_state()
+	
+	init_node = makeNode(table, [A, C])
+	
+	print(randomMutation(table, init_node, 0))
+	
+	#print(init_node)
+	
+	#init_node.score = waypoint_search(wp_map, init_node) 
+	
+	#print(init_node.score)

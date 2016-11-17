@@ -205,7 +205,7 @@ class Location:
 	
 	#Enables human readable object representation
 	def __str__(self):
-		return self.lType + "\n" + self.description
+		return self.lType
 	
 	def __repr__(self):
 		return str(self)
