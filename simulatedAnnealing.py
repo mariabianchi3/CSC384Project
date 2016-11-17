@@ -18,7 +18,7 @@ def randomMutation(table,node, p = 0.5):
 	m2_node = copy.deepcopy(node)
 	#TODO(Anyone): Don't need to run both functions, find a cleaner way of implementing the following
 	m1_node = type1Mutation(m1_node)
-	m2_node = type2Mutation(m2_node)
+	m2_node = type2Mutation(table, m2_node)
 	
 	#Choose which mutated node by weighted randomization of p
 	mutations = list(m1_node, m2_node)
@@ -33,8 +33,8 @@ def type1Mutation(m1_node):
 	#Mutate as long as there are more than one waypoint in the path
 	if len(m1_node.lType) > 1:
 		#Get 2 random indices
-		ind_swap = random.sample(range(0, len(list(m1_node.lType)) - 1), 2)
-		if m1_node.lPos[ind_swap[0]] != m1_node.lPod[ind_swap[1]]:
+		ind_swap = random.sample(range(0, len(list(m1_node.lType))), 2)
+		if m1_node.lPos[ind_swap[0]] != m1_node.lPos[ind_swap[1]]:
 			#Swap the node's location types
 			m1_node.lType[ind_swap[0]], m1_node.lType[ind_swap[1]] = \
 			m1_node.lType[ind_swap[1]], m1_node.lType[ind_swap[0]]
@@ -58,7 +58,8 @@ def type2Mutation(table, m2_node):
 	#Randomly select a location type that has more than one possible location position
 	while len(poi_waypoints) < 2 or possibleChoices != []:
 		ind_mod = random.choice(possibleChoices)
-		poi_waypoints = table.data[m2_node[ind_mod]]
+		poi_waypoints = table.data[m2_node.lType[ind_mod]]
+		
 		#Remove location type indices that have only 1 possible location position
 		if len(poi_waypoints) < 2:
 			possibleChoices = list(set(possibleChoices) - set(list(ind_mod)))

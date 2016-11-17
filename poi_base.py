@@ -329,4 +329,3 @@ class CSP:
 		self._cons = []
 
 
-
