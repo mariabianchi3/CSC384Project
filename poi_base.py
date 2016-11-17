@@ -51,7 +51,7 @@ class Point:
 	
 	#Enables human readable object representation
 	def __str__(self):
-		pos = (self.x, self.y, self.z) if self.z != None else (self.x, self.y)
+		pos = tuple((self.x, self.y, self.z)) if self.z != None else tuple((self.x, self.y))
 		return str(pos)
 
 	def __repr__(self):
@@ -112,8 +112,8 @@ class Waypoint:
 	
 	#Enables human readable object representation
 	def __str__(self):
-		Waypoint = self.name + " | " + str(self.position)
-		return Waypoint
+		waypoint = self.name + " | " + str(self.position)
+		return str(waypoint)
 		
 	def __repr__(self):
 		return str(self)
@@ -164,8 +164,8 @@ class POI(Waypoint):
 
 	#Enables human readable object representation
 	def __str__(self):
-		poi = self.name + " | " + str(self.location) + " | " + str(self.position)
-		return poi
+		poi = str(str(self.location.lType) + " | " + str(self.name) + " | " + str(self.position))
+		return str(poi)
 		
 	def __repr__(self):
 		return str(self)

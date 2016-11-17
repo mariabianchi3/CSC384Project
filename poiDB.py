@@ -76,7 +76,7 @@ class Table:
 		tableOutput += "|" + len(self.columns) * ("-" * colWidth + "|") + "\n"
 		
 		for lst in items:	
-			tableOutput += "|" + "|".join(str(item).center(colWidth) for item in lst) + "|\n"
+			tableOutput += "|" + "|".join(str(item).ljust(colWidth) for item in lst) + "|\n"
 		
 		return tableOutput
 
