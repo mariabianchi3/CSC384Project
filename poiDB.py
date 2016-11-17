@@ -127,7 +127,10 @@ class Database:
 	#Drop a table if it exists
 	def dropTable(self, tabName):
 		if tabName in self.tables.keys():
+			print("Dropping Table: " + tabName)
 			del self.tables[tabName]
+			if self.tables == OrderedDict():
+				print("Database Empty")
 		else:
 			print("Could not find Table by that name")
 
@@ -159,6 +162,20 @@ class Database:
 			allKeys.append(list(self.tables[tabName].data.keys())[key]) 
 		
 		return allKeys
+
+	#Annihilate the Database's shared state from existance
+	def _dropCascade(self):		
+		#drop all tables so they don't linger in memory
+		i = 0
+		tables = list(self.tables.keys())
+		
+		while i < len(tables):
+			self.dropTable(tables[i])
+			i += 1
+		
+		#Wipes the shared state to a blank one
+		self._tables = OrderedDict()
+
 
 	#Enables human readable object representation
 	def __str__(self):
