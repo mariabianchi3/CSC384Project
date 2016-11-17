@@ -41,7 +41,7 @@ class Table:
 	#Add a value to a key if it exists; add the key if it doesn't and add the value
 	def addValToKey(self, key, value):
 		if key not in self.data.keys():
-			self.AddKey(key)		
+			self.addKey(key)		
 		if value in list(self.data[key]):
 			print("Value already exists")
 		else:
@@ -113,7 +113,7 @@ class Database:
 	_tables = OrderedDict()
 	def __init__(self):
 		'''
-		@params tables: Dictionary of Table name : Table Object 
+		@params tables: shared state Dictionary of Table name : Table Object 
 		'''
 		self.tables = self._tables
 
@@ -151,24 +151,23 @@ class Database:
 		values = list(self.tables[tabName].data.values())
 		keyIndices = []
 		
-		valCount = 0
-		for subValue in values:
-			if val in subValue:
-				keyIndices.append(valCount)
-			valCount += 1
+		keyIndx = 0
+		while keyIndx < len(values):
+			if val in values[keyIndx]:
+				keyIndices.append(keyIndx)
+			keyIndx += 1
 		
-		allKeys = []
-		for key in keyIndices:
-			allKeys.append(list(self.tables[tabName].data.keys())[key]) 
+		allKeysWithVal = []
+		for i in keyIndices:
+			allKeysWithVal.append(list(self.tables[tabName].data.keys())[i]) 
 		
-		return allKeys
+		return allKeysWithVal
 
 	#Annihilate the Database's shared state from existance
 	def _dropCascade(self):		
 		#drop all tables so they don't linger in memory
 		i = 0
 		tables = list(self.tables.keys())
-		
 		while i < len(tables):
 			self.dropTable(tables[i])
 			i += 1
