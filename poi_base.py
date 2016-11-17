@@ -299,3 +299,31 @@ class Constraint:
 	
 	def __repr__(self):
 		return str(self)
+
+
+'''
+	Class:
+		CSP
+	
+	Description:
+		Container for all constraints
+	
+	Notes:
+		
+'''
+class CSP:
+	_cons = []
+	def __init__(self, name):
+		self.cons = self._cons
+	
+	def addConstraint(self, con):
+		self.cons.append(con)
+	
+	def getAllConstraints(self):
+		return self.cons
+	
+	def _dropCSP(self):
+		self._cons = []
+
+
+
