@@ -35,14 +35,21 @@ class Point:
 		else:
 			self.z = None
 	
-	'''Enables equivalence checking (i.e. == and != comparison of Point objects)'''
+	#Conversion functions
+	def toTuple(self):
+		return tuple(self.x, self.y) if self.z == None else tuple(self.x, self.y, self.z)
+	
+	def toList(self):
+		return list(self.x, self.y) if self.z == None else list(self.x, self.y, self.z)
+	
+	#Enables equivalence checking (i.e. == and != comparison of Point objects)
 	def __eq__(self, other):
 		return self.x == other.x and self.y == other.y and self.z == other.z
 	
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
 	
-	''' Enables human readable object representation '''
+	#Enables human readable object representation
 	def __str__(self):
 		pos = (self.x, self.y, self.z) if self.z != None else (self.x, self.y)
 		return str(pos)
@@ -87,24 +94,24 @@ class Waypoint:
 		
 		if (type(args[i]) != int) and (type(args[i]) != Point) and (type(args[i]) != tuple):
 			raise Exception("Waypoints only take a Point, tuple or integers for position\n")
-		
-		#Allow for multiple types of input(Point, tuple, or seperate numbers)
 
 		if type(args[i]) == Point:
 			self.position = args[i]
 		else:
 			#Convert coordinate input to list
 			pos = list(args[i:] if type(args[i]) == int else args[i])
-			self.position = Point(pos[0], pos[1]) if dim == 2 else Point(pos[0], pos[1], pos[2]) 
+			self.position = Point(pos[0], pos[1]) if dim == 2 else Point(pos[0], pos[1], pos[2])
+
+
 	
-	'''Enables equivalence checking (i.e. == and != comparison of Waypoint objects)'''
+	#Enables equivalence checking (i.e. == and != comparison of Waypoint objects)
 	def __eq__(self, other):
 		return self.name == other.name and self.position.__eq__(self, other)
 	
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
 	
-	''' Enables human readable object representation '''
+	#Enables human readable object representation
 	def __str__(self):
 		Waypoint = self.name + " | " + str(self.position)
 		return Waypoint
@@ -148,18 +155,16 @@ class POI(Waypoint):
 			raise Exception(eMsg)
 		
 		Waypoint.__init__(self, name, *args)
-		#TODO(SLatychev): Need to add location type checking so that this class 
-		#is consistent description: "... taken from a standardized database..."
 		self.location = location
 	
-	'''Enables equivalence checking (i.e. == and != comparison of POI objects)'''	
+	#Enables equivalence checking (i.e. == and != comparison of POI objects)	
 	def __eq__(self, other):
 		return self.location == other.location and Waypoint.__eq__(self, other)
 	
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
 
-	''' Enables human readable object representation '''
+	#Enables human readable object representation
 	def __str__(self):
 		poi = self.name + " | " + str(self.location) + " | " + str(self.position)
 		return poi
@@ -191,14 +196,14 @@ class Location:
 		self.lType = lType
 		self.description = desc
 		
-	''' Enables equivalence checking (i.e. == and != comparison of Location objects)'''
+	#Enables equivalence checking (i.e. == and != comparison of Location objects)
 	def __eq__(self, other):
 		return self.lType == other.lType and self.description == other.description
 		
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
 	
-	''' Enables human readable object representation '''
+	#Enables human readable object representation
 	def __str__(self):
 		return self.lType
 	
@@ -237,7 +242,7 @@ class Node:
 		self.lPos = lPos
 		self.score = -1
 	
-	''' Enables equivalence checking (i.e. == and != comparison of Node objects)'''
+	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
 		return self.lType == other.lType and \
 				self.lPos == other.lPos and \
@@ -246,7 +251,7 @@ class Node:
 	def __ne__(self, other):
 		return not self.__eq__(self, other)
 	
-	''' Enables human readable object representation '''
+	#Enables human readable object representation
 	def __str__(self):
 		return "Location Order: " + str(self.lType) + \
 				"\nLocation Coordinates: " + str(self.lPos) + \
