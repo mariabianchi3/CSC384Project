@@ -1,7 +1,6 @@
 import random
 import copy
 from collections import OrderedDict
-from poi_base import *
 
 '''
 	Class: Table
