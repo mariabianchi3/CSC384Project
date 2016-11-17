@@ -71,3 +71,12 @@ def type2Mutation(table, m2_node):
 
 
 
+#Makes a Node object from a user specified path and the appropriate table in the database
+def makeNode(table, locationTypePath):
+	nodeTypes = locationTypePath
+	nodePoses = [table.data[poi_type][0] for poi_type in nodeTypes]
+	newNode = Node(nodeTypes, nodePoses)
+	return newNode
+
+
+
