@@ -8,8 +8,11 @@ from collections import OrderedDict
 		list of its columns.
 	
 	Notes: 
-		1 - OrderedDict is used to maintain consistency for lookups and printouts as dicts are
-		unordered.
+		1 - OrderedDict is used to maintain consistency for lookups and printouts 
+		as dicts are unordered.
+		
+		2 - Table is not a real database table, it is simply a named dictionary,
+		the current implementation would not allow for tables of more than 2 columns
 '''
 class Table:
 	def __init__(self, name, pKey, columns, data):
