@@ -41,7 +41,7 @@ def waypoint_search(initial_state, node):
 	initial_state_copy = copy.deepcopy(initial_state)
 	
 	# Make new copy of location tuples
-	POI = copy.deepcopy(node.lPos)
+	POI = copy.deepcopy(node.positions)
 	
 	# Add the global start and goal locations to the list
 	POI.insert(0, initial_state.global_start)

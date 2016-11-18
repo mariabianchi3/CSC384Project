@@ -239,7 +239,7 @@ class Node:
 		@param score: A score for the arrangement of the path
 		'''
 		self.locations = locations
-		self.postions = postions
+		self.positions = positions
 		self.score = -1
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)

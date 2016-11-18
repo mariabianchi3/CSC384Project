@@ -21,8 +21,8 @@ def randomMutation(table,node, p = 0.5):
 	m2_node = type2Mutation(table, m2_node)
 	
 	#Choose which mutated node by weighted randomization of p
-	mutations = list(m1_node, m2_node)
-	probabilities = list(p, 1-p)
+	mutations = list((m1_node, m2_node))
+	probabilities = list((p, 1-p))
 	return np.random.choice(mutations, 1, probabilities)
 	
 #TYPE 1 MUTATION
@@ -56,18 +56,20 @@ def type2Mutation(table, m2_node):
 	possibleChoices = list(range(0, len(m2_node.locations)))
 	
 	#Randomly select a location type that has more than one possible location position
-	while len(poi_waypoints) < 2 or possibleChoices != []:
+	while len(poi_waypoints) < 2 and possibleChoices != []:
 		ind_mod = random.choice(possibleChoices)
-		poi_waypoints = table.data[m2_node.locations[ind_mod].lType]
+		poi_waypoints = table.data[m2_node.locations[ind_mod].code]
 		
 		#Remove location type indices that have only 1 possible location position
 		if len(poi_waypoints) < 2:
-			possibleChoices = list(set(possibleChoices) - set(list(ind_mod)))
+			possibleChoices = list(set(possibleChoices) - set([ind_mod]))
 	
-	if possibleChoice != []:
-		poi_waypoints.remove(m2_node.locations[ind_mod].lType)
+	if possibleChoices != []:
+		#poi_waypoints.remove(m2_node.locations[ind_mod].lType)
+		poi_list = table.data[m2_node.locations[ind_mod].code]
+		poi_waypoints.remove(poi_list[ind_mod])
 		ind_replace = random.randint(0, len(poi_waypoints)-1) if (len(poi_waypoints) > 1) else 0
-		m2_node[ind_mod] = poi_waypoints[ind_replace]
+		m2_node.positions[ind_mod] = poi_waypoints[ind_replace].position.toTuple()
 	else:
 		raise Exception("No possible mutations")
 	
@@ -125,3 +127,6 @@ if __name__ == "__main__":
 	init_node.score = waypoint_search(wp_map, init_node) 
 	
 	print(init_node.score)
+	
+	print(randomMutation(table, init_node, 1))
+	print(randomMutation(table, init_node, 0))
