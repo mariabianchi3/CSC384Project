@@ -188,6 +188,7 @@ if __name__ == "__main__":
 	A = Location("ATM", "A")
 	C = Location("Coffee", "C")
 	L = Location("Library", "L")
+	H = Location("HotDog", "H")
 	
 	#Build all locations
 	A1 = POI("BMO", A, Point(1,3))
@@ -216,6 +217,18 @@ if __name__ == "__main__":
 	L5 = POI("Robarts", L, Point(15,15))
 	L6 = POI("Robarts", L, Point(14,14))
 	L7 = POI("Robarts", L, Point(12,7))
+	H1 = POI("HOTDOG", H, Point(25, 23))
+	H2 = POI("HOTDOG", H, Point(1, 1))
+	H3 = POI("HOTDOG", H, Point(5, 23))
+	H4 = POI("HOTDOG", H, Point(29, 23))
+	H5 = POI("HOTDOG", H, Point(14, 2))
+	H6 = POI("HOTDOG", H, Point(18, 26))
+	H7 = POI("HOTDOG", H, Point(26, 18))
+	H8 = POI("HOTDOG", H, Point(1, 29))
+	H9 = POI("HOTDOG", H, Point(29, 1))
+	H10 = POI("HOTDOG", H, Point(24, 29))
+	
+	
 	
 	DB.createTable("poiTab", "Type", ["Type", "POI"])
 	DB.tables["poiTab"].addValToKey(A.code, A1)
@@ -243,6 +256,16 @@ if __name__ == "__main__":
 	DB.tables["poiTab"].addValToKey(L.code, L5)
 	DB.tables["poiTab"].addValToKey(L.code, L6)
 	DB.tables["poiTab"].addValToKey(L.code, L7)
+	DB.tables["poiTab"].addValToKey(H.code, H1)
+	DB.tables["poiTab"].addValToKey(H.code, H2)
+	DB.tables["poiTab"].addValToKey(H.code, H3)
+	DB.tables["poiTab"].addValToKey(H.code, H4)
+	DB.tables["poiTab"].addValToKey(H.code, H5)
+	DB.tables["poiTab"].addValToKey(H.code, H6)
+	DB.tables["poiTab"].addValToKey(H.code, H7)
+	DB.tables["poiTab"].addValToKey(H.code, H8)
+	DB.tables["poiTab"].addValToKey(H.code, H9)
+	DB.tables["poiTab"].addValToKey(H.code, H10)
 	
 	wp_map = WaypointMapState("START", 0, None, 30, 30, # Dimensions
 					 (0,0), # Initial Position 
@@ -256,7 +279,7 @@ if __name__ == "__main__":
 
 	wp_map.print_state()
 	
-	init_node = makeNode(table, [L, C, A])
+	init_node = makeNode(table, [L, C, A, H])
 	
 	init_node.score, init_path = waypoint_search(wp_map, init_node) 
 	
@@ -274,6 +297,6 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 200)
+	searchSimulatedAnnealing(wp_map, init_node, 300)
 	
 	
