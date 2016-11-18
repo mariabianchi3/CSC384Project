@@ -71,7 +71,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 			p_accept = np.exp( delta_E / T_cur )
 			
 		# Update parent_node appropriately
-		parent_node = np.random.choice([child_node, parent_node], 1, [p_accept, 1-p_accept])[0]
+		parent_node = np.random.choice([child_node, parent_node], 1, False, [p_accept, 1-p_accept])[0]
 		
 		# Save best parent_node so far
 		if parent_node.score < best_node.score:
