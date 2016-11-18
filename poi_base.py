@@ -21,6 +21,7 @@ class Point:
 		@param y: y coordinate
 		@param z: z coordinate
 		'''
+		#Exception handling
 		if len(args) < 2 or len(args) > 3:
 			raise Exception("Points only accept 2D or 3D")
 		for i in range(0, len(args)):
