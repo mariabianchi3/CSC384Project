@@ -7,6 +7,88 @@ from poiDB import *
 from wp_search import *
 from wp_search_helpers import *
 
+# Perform search with simulated annealing.
+# TODO: Make sure user inputs make sense / we have all that we want
+def searchSimulatedAnnealing(wp_map, init_node, iter_max):
+
+	###########################################################
+	# Step 1: Initialize all algorithm specific parameters    #
+	###########################################################
+	
+	# TODO: We need to decide which of these are user controlled, and which 
+	#       we fix. 
+	mutation_type_prob = 0.5 # Equal probability of both mutations occuring
+	# This is a probability in (0,100). Closer to 100 corresponds to a "hotter"
+	# initial temperature, while closer to 0 corresponds to a "colder" initial
+	# temperature
+	# TODO: Explain the math behind this better
+	temp_shape_param = 50
+	T_0 = - np.mean((wp_map.width, wp_map.height)) / np.log(temp_shape_param / 100)
+	
+	###########################################################
+	# Step 2: Initialize saved information + file output      #
+	###########################################################
+	best_node = copy.deepcopy(init_node)
+	best_score, best_steps = waypoint_search(wp_map, best_node) # Need to load it with a score
+	
+	parent_node = copy.deepcopy(init_node)
+	target = open('MATLAB/simulated_annealing_output.txt', 'w') #TODO: How to integrate this? 
+	
+	###########################################################
+	# Step 3: Iterate iter_max times and perform search       #
+	###########################################################
+	for i in range(0, iter_max):
+		# Current temperature
+		# TODO: Should this be a user defined function passed in? 
+		#       Problem with this is that it needs to go to zero at iter_max
+		#       So I'm not too sure if it's a smart idea to let the user play 
+		#       with this...
+		T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
+		
+		# Now mutate the parent node
+		child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
+		
+		# TODO: Add constraint checking portion!!!
+		
+		# Calculate energies
+		# TODO: Perhaps this function isn't really aptly named. Change? 
+		parent_energy, parent_steps = waypoint_search(wp_map, parent_node)
+		child_energy, child_steps = waypoint_search(wp_map, child_node)
+		delta_E = parent_energy - child_energy
+		
+		# Calculate acceptance probabilities
+		if delta_E > 0: # Child is better, accept
+			p_accept = 1.0
+		else: # Child is worse, accept with probability e^(DeltaE/T)
+			p_accept = np.exp( delta_E / T_cur )
+			
+		# Update parent_node appropriately
+		parent_node = np.random.choice([child_node, parent_node], 1, [p_accept, 1-p_accept])[0]
+	
+		# Save best parent_node so far
+		if parent_node.score < best_node.score:
+			best_node = parent_node
+			best_steps = parent_steps
+			
+		# Log information to file
+		output_data = [i, T_cur, delta_E, p_accept, parent_node.score, best_node.score]
+		str_out = '\t'.join(map(str, output_data)) + '\n' 
+		target.write(str_out)
+		
+	# Algorithm is complete. Return best node found so far
+	print("\n================ DONE!!! =======================\n")
+	
+	wp_map.print_state()
+	
+	print(best_node)
+	
+	print('\n')
+	
+	for step in best_steps:
+		step.print_full_path()
+		
+	return best_node
+		
 #Choose which mutation to apply to the node with a weighted probability p (type1 = p, type2 = 1-p)
 def randomMutation(table, node, p = 0.5):
 	if type(node) != Node:
@@ -121,10 +203,11 @@ if __name__ == "__main__":
 
 	wp_map.print_state()
 	
-	init_node = makeNode(table, [A, C])
+	init_node = makeNode(table, [C, A, L])
 	
 	init_node.score = waypoint_search(wp_map, init_node) 
 	
+	'''
 	print("Initial Node")
 	print("===========================================================")
 	print(init_node)
@@ -134,3 +217,10 @@ if __name__ == "__main__":
 	print("\nType 2 Mutated Node")
 	print("===========================================================")
 	print(randomMutation(table, init_node, 0))
+	'''
+	
+	#print("\nSimulated Annealing Test Run")	
+	#print("===========================================================")
+	searchSimulatedAnnealing(wp_map, init_node, 5)
+	
+	

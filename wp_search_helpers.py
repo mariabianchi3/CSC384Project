@@ -40,6 +40,10 @@ def waypoint_search(initial_state, node):
 	
 	initial_state_copy = copy.deepcopy(initial_state)
 	
+	# TODO: Currently we will collect all results from the searches, and 
+	#       return this list so that the user can see what the steps were.
+	path_steps = []
+	
 	# Make new copy of location tuples
 	#NOTE(To: Adrian, From: Stefan):
 	#		The Node class has been changed, it now only contains pois
@@ -63,11 +67,18 @@ def waypoint_search(initial_state, node):
 		attempt.global_start = initial_state_copy.global_start
 		attempt.global_end = initial_state_copy.global_end
 		
+		# Collect the results of the search
+		path_steps.append(attempt)
+		
 		if attempt:
-			attempt.print_full_path()
+			#attempt.print_full_path()
 			score += attempt.gval
 		else:
 			return 1000
+	
+	# Update the node with it's score (modify the actual input node)
+	node.score = score
 		
-	return score
+	# Also return score
+	return score, path_steps
 
