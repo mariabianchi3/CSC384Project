@@ -52,10 +52,18 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 		
 		# Calculate energies
 		# TODO: Perhaps this function isn't really aptly named. Change? 
-		parent_energy, parent_steps = waypoint_search(wp_map, parent_node)
-		child_energy, child_steps = waypoint_search(wp_map, child_node)
-		delta_E = parent_energy - child_energy
+		#       Also we can probably move these assignments to be inside the 
+		#       function, correct?
+		parent_energy, parent_map_states = waypoint_search(wp_map, parent_node)
+		parent_node.score = parent_energy
+		parent_node.map_states = parent_map_states
 		
+		child_energy, child_map_states = waypoint_search(wp_map, child_node)
+		child_node.score = child_energy
+		child_node.map_states = child_map_states
+		
+		delta_E = parent_energy - child_energy
+				
 		# Calculate acceptance probabilities
 		if delta_E > 0: # Child is better, accept
 			p_accept = 1.0
@@ -64,11 +72,10 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 			
 		# Update parent_node appropriately
 		parent_node = np.random.choice([child_node, parent_node], 1, [p_accept, 1-p_accept])[0]
-	
+		
 		# Save best parent_node so far
 		if parent_node.score < best_node.score:
-			best_node = parent_node
-			best_steps = parent_steps
+			best_node = copy.deepcopy(parent_node)
 			
 		# Log information to file
 		output_data = [i, T_cur, delta_E, p_accept, parent_node.score, best_node.score]
@@ -84,8 +91,8 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	
 	print('\n')
 	
-	for step in best_steps:
-		step.print_full_path()
+	for state in best_node.map_states:
+		state.print_full_path()
 		
 	return best_node
 		
@@ -203,9 +210,9 @@ if __name__ == "__main__":
 
 	wp_map.print_state()
 	
-	init_node = makeNode(table, [C, A, L])
+	init_node = makeNode(table, [L, C, A])
 	
-	init_node.score = waypoint_search(wp_map, init_node) 
+	init_node.score, init_path = waypoint_search(wp_map, init_node) 
 	
 	'''
 	print("Initial Node")
@@ -221,6 +228,6 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 5)
+	searchSimulatedAnnealing(wp_map, init_node, 200)
 	
 	

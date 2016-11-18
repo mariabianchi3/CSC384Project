@@ -236,11 +236,11 @@ class Node:
 	def __init__(self, pois):
 		'''
 		@param pois: A list of POIS
-		@param lType: A list containing Location types of POIs
-		@param lPos: A list containing the POIs' positions
+		@param map_states: A list of map states from the waypoint search
 		@param score: A score for the arrangement of the path
 		'''
 		self.pois = pois
+		self.map_states = [] # Initialize as empty
 		self.score = -1
 	
 	def types(self):

@@ -75,10 +75,7 @@ def waypoint_search(initial_state, node):
 			score += attempt.gval
 		else:
 			return 1000
-	
-	# Update the node with it's score (modify the actual input node)
-	node.score = score
-		
+			
 	# Also return score
 	return score, path_steps
 
