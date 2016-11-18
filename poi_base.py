@@ -136,8 +136,8 @@ class POI(Waypoint):
 	def __init__(self, name, location, *args):
 		'''
 		@param name: POI name (from super, cannot be empty string)
-		@param position: POI (x,y,z) coordinates (from super)
 		@param locationType: Type of location the POI is
+		@param *args: Takes in variable number fo arguments for position (passed to super)
 		'''
 		#Exception handling
 		eCount = 0
@@ -188,6 +188,7 @@ class Location:
 	def __init__(self, lType, code, desc=''):
 		'''
 		@param lType: The type of the location (Coffee Shope, Library, etc.)
+		@param code: Single letter code for location type used for map representation
 		@param description: Generic description of location type (Optional)
 		'''
 		self.lType = lType
@@ -233,7 +234,6 @@ class Location:
 '''
 class Node:
 	def __init__(self, pois):
-		#locations, positions, 
 		'''
 		@param pois: A list of POIS
 		@param lType: A list containing Location types of POIs
@@ -242,19 +242,17 @@ class Node:
 		'''
 		self.pois = pois
 		self.score = -1
-		
-		#NOTE(ALL): Depricated
-		#self.locations = locations
-		#self.positions = positions
+	
+	def types(self):
+		return [poi.location.lType for poi in self.pois]
+	
+	def coords(self):
+		return [poi.position.toTuple() for poi in self.pois]
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
 		return self.pois == other.pois and \
 				self.score == other.score
-				
-				#NOTE(ALL): Depricated
-				#self.locations == other.locations and \
-				#self.position == other.positions and \
 	
 	def __ne__(self, other):
 		return not self.__eq__(other)
@@ -264,12 +262,8 @@ class Node:
 		return "POIs: " + str(self.pois) + \
 				"\nLocation Types: " + str([poi.location.lType for poi in self.pois]) + \
 				"\nLocation Names: " + str([poi.name for poi in self.pois]) + \
-				"\nLocation Poses: " + str([poi.position for poi in self.pois]) + \
+				"\nLocation Coord: " + str([poi.position for poi in self.pois]) + \
 				"\nPath Score: " + str(self.score)
-				
-				#NOTE(ALL): Depricated
-				#"\nLocation Order: " + str(self.locations) + \
-				#"\nLocation Coordinates: " + str(self.positions) + \
 	
 	def __repr__(self):
 		 return str(self)

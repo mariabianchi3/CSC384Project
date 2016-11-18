@@ -51,7 +51,7 @@ def waypoint_search(initial_state, node):
 	#POI = copy.deepcopy(node.positions)
 	
 	# =====NEW WAY=====
-	POI = [poi.position.toTuple() for poi in node.pois]
+	POI = node.coords()
 	
 	# Add the global start and goal locations to the list
 	POI.insert(0, initial_state.global_start)

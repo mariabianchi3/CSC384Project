@@ -22,7 +22,9 @@ def randomMutation(table, node, p = 0.5):
 		mut_node = type2Mutation(table, m2_node)
 	
 	return mut_node
-	
+
+
+
 #Type 1: Randomly select 2 of the node's elements and swap their order
 def type1Mutation(m1_node):
 	#Allow swaps to happen only if there is more than 1 element to swap
@@ -31,31 +33,18 @@ def type1Mutation(m1_node):
 		
 		#Allow the swap only if the two chosen elements don't share the same position
 		if m1_node.pois[ind_swap[0]].position != m1_node.pois[ind_swap[1]].position:
-			#NOTE(ALL): This is indicative that node is not a well built class
-			#			We should consider dropping locations and positions
-			#			and just using the poi as it already contains all this
-			#			information
-			#			We would only need to swap pois if we reduced node to just
-			#			being a container of pois with a score
 
 			#Swap the node's pois
 			m1_node.pois[ind_swap[0]], m1_node.pois[ind_swap[1]] = \
 			m1_node.pois[ind_swap[1]], m1_node.pois[ind_swap[0]]
-			
-			#NOTE(ALL): Depricated
-			#Swap the node's location types
-			#m1_node.locations[ind_swap[0]], m1_node.locations[ind_swap[1]] = \
-			#m1_node.locations[ind_swap[1]], m1_node.locations[ind_swap[0]]
-
-			#Swap the node's location positions
-			#m1_node.positions[ind_swap[0]], m1_node.positions[ind_swap[1]] = \
-			#m1_node.positions[ind_swap[1]], m1_node.positions[ind_swap[0]]
 		else:
 			raise Exception("Chosen positions for swapping have the same position")
 	else:
 		raise Exception("No possible mutations")
 	
 	return m1_node
+
+
 
 #Type 2: Randomly select one of the node's elements and change it to an element of equal type
 def type2Mutation(table, m2_node):	
@@ -80,10 +69,6 @@ def type2Mutation(table, m2_node):
 		
 		#Change all the data of the old element to the newly selected element
 		m2_node.pois[ind_mod] = poi_list[ind_replace]
-		
-		#NOTE(ALL): Depricated
-		#m2_node.locations = [poi.location.lType for poi in m2_node.pois]
-		#m2_node.positions = [poi.position.toTuple() for poi in m2_node.pois]
 	else:
 		raise Exception("No possible mutations")
 	
@@ -95,11 +80,6 @@ def type2Mutation(table, m2_node):
 def makeNode(table, locationTypePath):
 	nodePOIs = [table.data[poi_type.code][0] for poi_type in locationTypePath]
 	newNode = Node(nodePOIs)
-	
-	#NOTE(ALL): Depricated
-	#nodeTypes, nodePoses,
-	#nodePoses = [poi.position.toTuple() for poi in nodePOIs]
-	#nodeTypes = locationTypePath
 	
 	return newNode
 
