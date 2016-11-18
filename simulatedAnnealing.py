@@ -7,69 +7,83 @@ from poiDB import *
 from wp_search import *
 from wp_search_helpers import *
 
-#Mutates the node to either a type 1 with probability p and type 2 with probability 1-p
-def randomMutation(table,node, p = 0.5):
-	#Force node to be of type node
+#Choose which mutation to apply to the node with a weighted probability p (type1 = p, type2 = 1-p)
+def randomMutation(table, node, p = 0.5):
 	if type(node) != Node:
 		raise Exception("node must be of type Node")
 	
-	#Initialize mutations
-	m1_node = copy.deepcopy(node)
-	m2_node = copy.deepcopy(node)
-	#TODO(Anyone): Don't need to run both functions, find a cleaner way of implementing the following
-	m1_node = type1Mutation(m1_node)
-	m2_node = type2Mutation(table, m2_node)
+	mut_node = None
+	isType1 = np.random.choice([True, False], 1, False, [p, 1-p])[0]
+	if isType1:
+		m1_node = copy.deepcopy(node)
+		mut_node = type1Mutation(m1_node)
+	else:
+		m2_node = copy.deepcopy(node)
+		mut_node = type2Mutation(table, m2_node)
 	
-	#Choose which mutated node by weighted randomization of p
-	mutations = list((m1_node, m2_node))
-	probabilities = list((p, 1-p))
-	return np.random.choice(mutations, 1, probabilities)
+	return mut_node
 	
-#TYPE 1 MUTATION
+#Type 1: Randomly select 2 of the node's elements and swap their order
 def type1Mutation(m1_node):
-	#TODO(SLatychev): What happens when someone wants to just visit one and only one location
-	#along their path from start to goal.
-	
-	#Mutate as long as there are more than one waypoint in the path
-	if len(m1_node.locations) > 1:
-		#Get 2 random indices
-		ind_swap = random.sample(range(0, len(list(m1_node.locations))), 2)
-		if m1_node.positions[ind_swap[0]] != m1_node.positions[ind_swap[1]]:
+	#Allow swaps to happen only if there is more than 1 element to swap
+	if len(m1_node.pois) > 1:
+		ind_swap = random.sample(range(0, len(list(m1_node.pois))), 2)
+		
+		#Allow the swap only if the two chosen elements don't share the same position
+		if m1_node.pois[ind_swap[0]].position != m1_node.pois[ind_swap[1]].position:
+			#NOTE(ALL): This is indicative that node is not a well built class
+			#			We should consider dropping locations and positions
+			#			and just using the poi as it already contains all this
+			#			information
+			#			We would only need to swap pois if we reduced node to just
+			#			being a container of pois with a score
+
+			#Swap the node's pois
+			m1_node.pois[ind_swap[0]], m1_node.pois[ind_swap[1]] = \
+			m1_node.pois[ind_swap[1]], m1_node.pois[ind_swap[0]]
+			
+			#NOTE(ALL): Depricated
 			#Swap the node's location types
-			m1_node.locations[ind_swap[0]], m1_node.locations[ind_swap[1]] = \
-			m1_node.locations[ind_swap[1]], m1_node.locations[ind_swap[0]]
-	
+			#m1_node.locations[ind_swap[0]], m1_node.locations[ind_swap[1]] = \
+			#m1_node.locations[ind_swap[1]], m1_node.locations[ind_swap[0]]
+
 			#Swap the node's location positions
-			m1_node.positions[ind_swap[0]], m1_node.positions[ind_swap[1]] = \
-			m1_node.positions[ind_swap[1]], m1_node.positions[ind_swap[0]]
+			#m1_node.positions[ind_swap[0]], m1_node.positions[ind_swap[1]] = \
+			#m1_node.positions[ind_swap[1]], m1_node.positions[ind_swap[0]]
 		else:
 			raise Exception("Chosen positions for swapping have the same position")
 	else:
 		raise Exception("No possible mutations")
-		
+	
 	return m1_node
 
-#TYPE 2 MUTATION
+#Type 2: Randomly select one of the node's elements and change it to an element of equal type
 def type2Mutation(table, m2_node):	
-	#Initialize dummy waypoints list and list of valid location type indices
-	poi_waypoints = [0]
-	possibleChoices = list(range(0, len(m2_node.locations)))
+	#Initialize dummy poi list and a list of indices for pois that are non-unique
+	poi_list = [0]
+	possibleChoices = list(range(0, len(m2_node.pois)))
 	
-	#Randomly select a location type that has more than one possible location position
-	while len(poi_waypoints) < 2 and possibleChoices != []:
+	#Attempt to choose an index that gives
+	while len(poi_list) < 2 and possibleChoices != []:
 		ind_mod = random.choice(possibleChoices)
-		poi_waypoints = table.data[m2_node.locations[ind_mod].code]
+		poi_list = copy.deepcopy(table.data[m2_node.pois[ind_mod].location.code])
 		
-		#Remove location type indices that have only 1 possible location position
-		if len(poi_waypoints) < 2:
+		#If a poi is unique remove its node index from being a possible choice
+		if len(poi_list) < 2:
 			possibleChoices = list(set(possibleChoices) - set([ind_mod]))
 	
+	#Only change the poi if it is non-unique
 	if possibleChoices != []:
-		#poi_waypoints.remove(m2_node.locations[ind_mod].lType)
-		poi_list = table.data[m2_node.locations[ind_mod].code]
-		poi_waypoints.remove(poi_list[ind_mod])
-		ind_replace = random.randint(0, len(poi_waypoints)-1) if (len(poi_waypoints) > 1) else 0
-		m2_node.positions[ind_mod] = poi_waypoints[ind_replace].position.toTuple()
+		#Remove the current poi from the list of available pois and choose a random one's index
+		poi_list.remove(m2_node.pois[ind_mod])
+		ind_replace = random.randint(0, len(poi_list)-1) if (len(poi_list) > 1) else 0
+		
+		#Change all the data of the old element to the newly selected element
+		m2_node.pois[ind_mod] = poi_list[ind_replace]
+		
+		#NOTE(ALL): Depricated
+		#m2_node.locations = [poi.location.lType for poi in m2_node.pois]
+		#m2_node.positions = [poi.position.toTuple() for poi in m2_node.pois]
 	else:
 		raise Exception("No possible mutations")
 	
@@ -79,9 +93,14 @@ def type2Mutation(table, m2_node):
 
 #Makes a Node object from a user specified path and the appropriate table in the database
 def makeNode(table, locationTypePath):
-	nodeTypes = locationTypePath
-	nodePoses = [table.data[poi_type.code][0].position.toTuple() for poi_type in nodeTypes]
-	newNode = Node(nodeTypes, nodePoses)
+	nodePOIs = [table.data[poi_type.code][0] for poi_type in locationTypePath]
+	newNode = Node(nodePOIs)
+	
+	#NOTE(ALL): Depricated
+	#nodeTypes, nodePoses,
+	#nodePoses = [poi.position.toTuple() for poi in nodePOIs]
+	#nodeTypes = locationTypePath
+	
 	return newNode
 
 
@@ -126,7 +145,12 @@ if __name__ == "__main__":
 	
 	init_node.score = waypoint_search(wp_map, init_node) 
 	
-	print(init_node.score)
-	
+	print("Initial Node")
+	print("===========================================================")
+	print(init_node)
+	print("\nType 1 Mutated Node")
+	print("===========================================================")
 	print(randomMutation(table, init_node, 1))
+	print("\nType 2 Mutated Node")
+	print("===========================================================")
 	print(randomMutation(table, init_node, 0))

@@ -47,7 +47,7 @@ class Point:
 		return self.x == other.x and self.y == other.y and self.z == other.z
 	
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 	
 	#Enables human readable object representation
 	def __str__(self):
@@ -105,10 +105,10 @@ class Waypoint:
 	
 	#Enables equivalence checking (i.e. == and != comparison of Waypoint objects)
 	def __eq__(self, other):
-		return self.name == other.name and self.position.__eq__(self, other)
+		return self.name == other.name and self.position.__eq__(other.position)
 	
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 	
 	#Enables human readable object representation
 	def __str__(self):
@@ -160,11 +160,11 @@ class POI(Waypoint):
 		return self.location == other.location and Waypoint.__eq__(self, other)
 	
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 
 	#Enables human readable object representation
 	def __str__(self):
-		poi = str(str(self.location.lType) + " | " + str(self.name) + " | " + str(self.position))
+		poi = str(self.location.lType) + " | " + str(self.name) + " | " + str(self.position)
 		return str(poi)
 		
 	def __repr__(self):
@@ -201,7 +201,7 @@ class Location:
 		self.code == other.code
 		
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 	
 	#Enables human readable object representation
 	def __str__(self):
@@ -232,33 +232,48 @@ class Location:
 		
 '''
 class Node:
-	def __init__(self, locations, positions):
+	def __init__(self, pois):
+		#locations, positions, 
 		'''
-		@param lType: A list containing Location types
-		@param lPos: A list containing the Location types' positions
+		@param pois: A list of POIS
+		@param lType: A list containing Location types of POIs
+		@param lPos: A list containing the POIs' positions
 		@param score: A score for the arrangement of the path
 		'''
-		self.locations = locations
-		self.positions = positions
+		self.pois = pois
 		self.score = -1
+		
+		#NOTE(ALL): Depricated
+		#self.locations = locations
+		#self.positions = positions
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
-		return self.locations == other.locations and \
-				self.position == other.positions and \
+		return self.pois == other.pois and \
 				self.score == other.score
+				
+				#NOTE(ALL): Depricated
+				#self.locations == other.locations and \
+				#self.position == other.positions and \
 	
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 	
 	#Enables human readable object representation
 	def __str__(self):
-		return "Location Order: " + str(self.locations) + \
-				"\nLocation Coordinates: " + str(self.positions) + \
+		return "POIs: " + str(self.pois) + \
+				"\nLocation Types: " + str([poi.location.lType for poi in self.pois]) + \
+				"\nLocation Names: " + str([poi.name for poi in self.pois]) + \
+				"\nLocation Poses: " + str([poi.position for poi in self.pois]) + \
 				"\nPath Score: " + str(self.score)
+				
+				#NOTE(ALL): Depricated
+				#"\nLocation Order: " + str(self.locations) + \
+				#"\nLocation Coordinates: " + str(self.positions) + \
 	
 	def __repr__(self):
 		 return str(self)
+
 
 
 '''
@@ -294,7 +309,7 @@ class Constraint:
 				self.immediate == other.immediate
 	
 	def __ne__(self, other):
-		return not self.__eq__(self, other)
+		return not self.__eq__(other)
 	
 	#Enables human readable object representation
 	def __str__(self):

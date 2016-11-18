@@ -60,21 +60,26 @@ class Table:
 	#Enables human readable object representation
 	def __str__(self):
 		tableOutput = self.name + " Table\n"
+		
+		#Find the longest item in the table and set the column width to that size with padding
 		pData = list(self.data.keys()) + list(self.data.values())
 		pData = [val if type(sublst) == list else sublst for sublst in pData for val in sublst]
 		if pData != []:
 			colWidth = max(len(str(val))  for val in pData) + 2
 		else:
 			colWidth = max(len(str(col)) for col in self.columns) + 2
-			
+		
+		#Collect all the items of the table into a list of lists
 		items = []
 		for key, value in self.data.items():
 			for val in value:
 				items.append(list((key, value[value.index(val)])))
 		
+		#Generate the column headers printout
 		tableOutput += "|" + "|".join(item.center(colWidth) for item in self.columns) + "|\n"
 		tableOutput += "|" + len(self.columns) * ("-" * colWidth + "|") + "\n"
 		
+		#Generate the table data printout
 		for lst in items:	
 			tableOutput += "|" + "|".join(str(item).ljust(colWidth) for item in lst) + "|\n"
 		
@@ -163,7 +168,7 @@ class Database:
 		
 		return allKeysWithVal
 
-	#Annihilate the Database's shared state from existance
+	#Destroys all tables and resets the shared state of the db to a blank OrderedDict()
 	def _dropCascade(self):		
 		#drop all tables so they don't linger in memory
 		i = 0

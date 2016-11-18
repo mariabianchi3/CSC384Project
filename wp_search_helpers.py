@@ -41,7 +41,17 @@ def waypoint_search(initial_state, node):
 	initial_state_copy = copy.deepcopy(initial_state)
 	
 	# Make new copy of location tuples
-	POI = copy.deepcopy(node.positions)
+	#NOTE(To: Adrian, From: Stefan):
+	#		The Node class has been changed, it now only contains pois
+	#		It's poor code design and quality to have repeating/redundant data
+	#		inside a class. Since POI already contains location types and positions
+	#		just reference them from the pois in the node
+	
+	# =====OLD WAY=====
+	#POI = copy.deepcopy(node.positions)
+	
+	# =====NEW WAY=====
+	POI = [poi.position.toTuple() for poi in node.pois]
 	
 	# Add the global start and goal locations to the list
 	POI.insert(0, initial_state.global_start)
