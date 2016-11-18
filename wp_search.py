@@ -14,7 +14,7 @@ from search import *
 
 class WaypointMapState(StateSpace):
 
-	def __init__(self, action, gval, parent, width, height, global_start, global_end, table, obstacles):
+	def __init__(self, action, gval, parent, width, height, cur_start, cur_end, table, obstacles):
 		'''
 		Creates a new Waypoint Map state.
 		@param width: The map X dimension.
@@ -27,15 +27,15 @@ class WaypointMapState(StateSpace):
 		StateSpace.__init__(self, action, gval, parent)
 		self.width = width
 		self.height = height
-		self.global_start = global_start
-		self.global_end = global_end
 		self.table = table
 		self.obstacles = obstacles	
 
 		# These fields are not needed to instantiate object
-		self.cur_start = global_start
-		self.cur_end = global_end
+		self.cur_start = cur_start
+		self.cur_end = cur_end
 
+		self.global_start = cur_start
+		self.global_end = cur_end
 
 	def successors(self):
 		'''
@@ -55,6 +55,11 @@ class WaypointMapState(StateSpace):
 				continue
 			  
 			new_state = WaypointMapState(direction.name, self.gval + transition_cost, self, self.width, self.height, new_location, self.cur_end, self.table, self.obstacles)
+			
+			#TODO: This is super super hacky
+			new_state.global_start = self.global_start
+			new_state.global_end = self.global_end
+			
 			successors.append(new_state)
 
 		return successors
