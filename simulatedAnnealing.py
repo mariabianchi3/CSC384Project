@@ -173,6 +173,13 @@ def makeNode(table, locationTypePath):
 	return newNode
 
 
+#Generate a list of Location objects without descriptions
+def generateLocationTypes(typeList):
+	listOfLocs = []
+	for locationType in typeList:
+		listOfLocs.append(Location(locationType, locationType[0]))
+	return listOfLocs
+
 if __name__ == "__main__":
 	#Build DB
 	DB = Database()
