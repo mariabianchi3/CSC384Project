@@ -16,7 +16,7 @@ import copy
 #		   Heuristics			   #
 ####################################
 def heur_manhattan_dist(state):
-	return np.sum(np.absolute(np.subtract(state.cur_pos, state.des_pos)))
+	return np.sum(np.absolute(np.subtract(state.cur_start, state.cur_end)))
 	
 ####################################
 #		   A* Helpers			   #
@@ -43,15 +43,18 @@ def waypoint_search(initial_state, node):
 	# Make new copy of location tuples
 	POI = copy.deepcopy(node.lPos)
 	
-	POI.insert(0, initial_state.cur_pos)
-	POI.append(initial_state.des_pos)
+	# Add the global start and goal locations to the list
+	POI.insert(0, initial_state.global_start)
+	POI.append(initial_state.global_end)
 	
 	for start, end in zip(POI[0:len(POI)-1], POI[1:len(POI)]):
-		initial_state_copy.cur_pos = start
-		initial_state_copy.des_pos = end
+		initial_state_copy.cur_start = start
+		initial_state_copy.cur_end = end
 		
 		attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound)
-				
+		attempt.global_start = initial_state_copy.global_start
+		attempt.global_end = initial_state_copy.global_end
+		
 		if attempt:
 			attempt.print_full_path()
 			score += attempt.gval

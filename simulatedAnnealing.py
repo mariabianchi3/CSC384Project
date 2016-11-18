@@ -123,10 +123,6 @@ if __name__ == "__main__":
 	
 	init_node = makeNode(table, [A, C])
 	
-	print(randomMutation(table, init_node, 0))
+	init_node.score = waypoint_search(wp_map, init_node) 
 	
-	#print(init_node)
-	
-	#init_node.score = waypoint_search(wp_map, init_node) 
-	
-	#print(init_node.score)
+	print(init_node.score)

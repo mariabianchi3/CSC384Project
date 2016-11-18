@@ -14,23 +14,28 @@ from search import *
 
 class WaypointMapState(StateSpace):
 
-	def __init__(self, action, gval, parent, width, height, cur_pos, des_pos, table, obstacles):
+	def __init__(self, action, gval, parent, width, height, global_start, global_end, table, obstacles):
 		'''
 		Creates a new Waypoint Map state.
 		@param width: The map X dimension.
 		@param height: The map Y dimension.
-		@param cur_pos: a tuple of current x and y position 
-		@param des_pos: a tuple of the desired position 
+		@param cur_start: a tuple of current x and y position 
+		@param cur_end: a tuple of the desired position 
 		@param POI: a dictionary of all points of interests
 		@param obstacles: A frozenset of all the impassable obstacles.
 		'''
 		StateSpace.__init__(self, action, gval, parent)
 		self.width = width
 		self.height = height
-		self.cur_pos = cur_pos
-		self.des_pos = des_pos
+		self.global_start = global_start
+		self.global_end = global_end
 		self.table = table
 		self.obstacles = obstacles	
+
+		# These fields are not needed to instantiate object
+		self.cur_start = global_start
+		self.cur_end = global_end
+
 
 	def successors(self):
 		'''
@@ -40,7 +45,7 @@ class WaypointMapState(StateSpace):
 		transition_cost = 1
 
 		for direction in (UP, RIGHT, DOWN, LEFT):
-			new_location = direction.move(self.cur_pos)
+			new_location = direction.move(self.cur_start)
 			  
 			if new_location[0] < 0 or new_location[0] >= self.width:
 				continue
@@ -49,14 +54,14 @@ class WaypointMapState(StateSpace):
 			if new_location in self.obstacles:
 				continue
 			  
-			new_state = WaypointMapState(direction.name, self.gval + transition_cost, self, self.width, self.height, new_location, self.des_pos, self.table, self.obstacles)
+			new_state = WaypointMapState(direction.name, self.gval + transition_cost, self, self.width, self.height, new_location, self.cur_end, self.table, self.obstacles)
 			successors.append(new_state)
 
 		return successors
 
 	def hashable_state(self):
 		'''Return a data item that can be used as a dictionary key to UNIQUELY represent a state.'''
-		return hash(self.cur_pos)	  
+		return hash(self.cur_start)	  
 
 	def state_string(self):
 		'''Returns a string representation of a state that can be printed to stdout.'''		
@@ -67,18 +72,20 @@ class WaypointMapState(StateSpace):
 			for x in range(0, self.width):
 				row += [' ']
 			map += [row]
+
+		# First the global goal
+		map[self.global_end[1]][self.global_end[0]] = '@'
+		
+		# And then the current position
+		map[self.global_start[1]][self.global_start[0]] = '*'
 		
 		# Write the Points of Interest from the Table
+		# We do this after the goal and start positions so that 
+		# during intermediate searches the waypoint identifier is clear
 		for key in list(self.table.data.keys()):
 			for poi in list(self.table.data[key]):
 				tup_pos = poi.position.toTuple()
 				map[tup_pos[1]][tup_pos[0]] = key
-
-		# Next the goal
-		map[self.des_pos[1]][self.des_pos[0]] = '@'
-		
-		# And then the current position
-		map[self.cur_pos[1]][self.cur_pos[0]] = '*'
 
 		# And of course the obstacles
 		for obstacle in self.obstacles:
@@ -133,7 +140,7 @@ class WaypointMapState(StateSpace):
 				map_str = '~' # This would be weird...
 		
 			# Write a path marker to the current position of the agent
-			cur_pos_ind = parent_state.cur_pos
+			cur_pos_ind = parent_state.cur_start
 			ind = (self.width+3)*(cur_pos_ind[1]+1) + (cur_pos_ind[0]+1)
 			path_str[ind] = map_str
 			
@@ -151,7 +158,7 @@ def waypoint_map_goal_state(state):
 	'''Returns True if we have reached a goal state'''
 	'''INPUT: a waypoint_map state'''
 	'''OUTPUT: True (if goal) or False (if not)'''  
-	return state.cur_pos == state.des_pos
+	return state.cur_start == state.cur_end
   
 
 '''
