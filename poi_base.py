@@ -249,6 +249,9 @@ class Node:
 	def coords(self):
 		return [poi.position.toTuple() for poi in self.pois]
 	
+	def codes(self):
+		return [poi.location.code for poi in self.pois]
+	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
 		return self.pois == other.pois and \
