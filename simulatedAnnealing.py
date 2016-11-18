@@ -83,7 +83,6 @@ def makeNode(table, locationTypePath):
 	return newNode
 
 
-
 if __name__ == "__main__":
 	#Build DB
 	DB = Database()

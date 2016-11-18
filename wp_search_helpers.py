@@ -63,28 +63,3 @@ def waypoint_search(initial_state, node):
 		
 	return score
 
-if __name__ == "__main__":
-	
-	# Just some testing code
-
-	timebound = 1
-	
-	s0 = PROBLEMS[1]
-	se = SearchEngine('astar', 'full')
-	se.trace_on(0)
-
-	final = se.search(s0, waypoint_map_goal_state, heur_manhattan_dist, timebound)
-	
-	if final:
-		print("Solution Found!")
-		final.print_full_path()
-	else:
-		print(final)
-		print("No Solution Found!")
-  
-	print('----------------------')
-	
-	POI = [(0,0),(0,5),(3,2),(5,5)]
-	
-	score = waypoint_search(s0, POI)
-	print(score)
