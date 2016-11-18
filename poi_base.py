@@ -232,20 +232,20 @@ class Location:
 		
 '''
 class Node:
-	def __init__(self, lType, lPos):
+	def __init__(self, locations, positions):
 		'''
 		@param lType: A list containing Location types
 		@param lPos: A list containing the Location types' positions
 		@param score: A score for the arrangement of the path
 		'''
-		self.lType = lType
-		self.lPos = lPos
+		self.locations = locations
+		self.postions = postions
 		self.score = -1
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
-		return self.lType == other.lType and \
-				self.lPos == other.lPos and \
+		return self.locations == other.locations and \
+				self.position == other.positions and \
 				self.score == other.score
 	
 	def __ne__(self, other):
@@ -253,8 +253,8 @@ class Node:
 	
 	#Enables human readable object representation
 	def __str__(self):
-		return "Location Order: " + str(self.lType) + \
-				"\nLocation Coordinates: " + str(self.lPos) + \
+		return "Location Order: " + str(self.locations) + \
+				"\nLocation Coordinates: " + str(self.positions) + \
 				"\nPath Score: " + str(self.score)
 	
 	def __repr__(self):

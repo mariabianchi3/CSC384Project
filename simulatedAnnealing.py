@@ -31,17 +31,17 @@ def type1Mutation(m1_node):
 	#along their path from start to goal.
 	
 	#Mutate as long as there are more than one waypoint in the path
-	if len(m1_node.lType) > 1:
+	if len(m1_node.locations) > 1:
 		#Get 2 random indices
-		ind_swap = random.sample(range(0, len(list(m1_node.lType))), 2)
-		if m1_node.lPos[ind_swap[0]] != m1_node.lPos[ind_swap[1]]:
+		ind_swap = random.sample(range(0, len(list(m1_node.locations))), 2)
+		if m1_node.positions[ind_swap[0]] != m1_node.positions[ind_swap[1]]:
 			#Swap the node's location types
-			m1_node.lType[ind_swap[0]], m1_node.lType[ind_swap[1]] = \
-			m1_node.lType[ind_swap[1]], m1_node.lType[ind_swap[0]]
+			m1_node.locations[ind_swap[0]], m1_node.locations[ind_swap[1]] = \
+			m1_node.locations[ind_swap[1]], m1_node.locations[ind_swap[0]]
 	
 			#Swap the node's location positions
-			m1_node.lPos[ind_swap[0]], m1_node.lPos[ind_swap[1]] = \
-			m1_node.lPos[ind_swap[1]], m1_node.lPos[ind_swap[0]]
+			m1_node.positions[ind_swap[0]], m1_node.positions[ind_swap[1]] = \
+			m1_node.positions[ind_swap[1]], m1_node.positions[ind_swap[0]]
 		else:
 			raise Exception("Chosen positions for swapping have the same position")
 	else:
@@ -53,19 +53,19 @@ def type1Mutation(m1_node):
 def type2Mutation(table, m2_node):	
 	#Initialize dummy waypoints list and list of valid location type indices
 	poi_waypoints = [0]
-	possibleChoices = list(range(0, len(m2_node.lType)))
+	possibleChoices = list(range(0, len(m2_node.locations)))
 	
 	#Randomly select a location type that has more than one possible location position
 	while len(poi_waypoints) < 2 or possibleChoices != []:
 		ind_mod = random.choice(possibleChoices)
-		poi_waypoints = table.data[m2_node.lType[ind_mod]]
+		poi_waypoints = table.data[m2_node.locations[ind_mod].lType]
 		
 		#Remove location type indices that have only 1 possible location position
 		if len(poi_waypoints) < 2:
 			possibleChoices = list(set(possibleChoices) - set(list(ind_mod)))
 	
 	if possibleChoice != []:
-		poi_waypoints.remove(m2_node[ind_mod])
+		poi_waypoints.remove(m2_node.locations[ind_mod].lType)
 		ind_replace = random.randint(0, len(poi_waypoints)-1) if (len(poi_waypoints) > 1) else 0
 		m2_node[ind_mod] = poi_waypoints[ind_replace]
 	else:
