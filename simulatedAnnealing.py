@@ -22,7 +22,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	# initial temperature, while closer to 0 corresponds to a "colder" initial
 	# temperature
 	# TODO: Explain the math behind this better
-	temp_shape_param = 50
+	temp_shape_param = 80
 	T_0 = - np.mean((wp_map.width, wp_map.height)) / np.log(temp_shape_param / 100)
 	
 	###########################################################
@@ -297,6 +297,6 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 300)
+	searchSimulatedAnnealing(wp_map, init_node, 500)
 	
 	
