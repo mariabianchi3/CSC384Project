@@ -128,12 +128,12 @@ class WaypointMapState(StateSpace):
 		# Initial path string from just before solution
 		parent_state = self.parent
 		path_str = list(parent_state.state_string())
+
+		# We don't want to print over the intermediate waypoints during 
+		# intermediate searches!		
+		while parent_state.parent != None:
 		
-		while parent_state != None:
-		
-			if parent_state.parent == None:
-				map_str = '*'
-			elif parent_state.action == UP.name:
+			if parent_state.action == UP.name:
 				map_str = '^'
 			elif parent_state.action == DOWN.name:
 				map_str = 'v'
