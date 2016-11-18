@@ -43,9 +43,7 @@ def waypoint_search(initial_state, node):
 	# Make new copy of location tuples
 	#NOTE(To: Adrian, From: Stefan):
 	#		The Node class has been changed, it now only contains pois
-	#		It's poor code design and quality to have repeating/redundant data
-	#		inside a class. Since POI already contains location types and positions
-	#		just reference them from the pois in the node
+	#		Added coords() and types() functions to avoid constant list comprehension
 	
 	# =====OLD WAY=====
 	#POI = copy.deepcopy(node.positions)
