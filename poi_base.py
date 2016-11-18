@@ -321,6 +321,7 @@ class Constraint:
 		Container for all constraints
 	
 	Notes:
+		Again using Borg since we only want a single CSP for the current map and db
 		
 '''
 class CSP:
@@ -335,6 +336,8 @@ class CSP:
 		return self.cons
 	
 	def _dropCSP(self):
+		while self.cons != []:
+			del self.cons[0]
 		self._cons = []
 
 

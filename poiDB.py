@@ -174,6 +174,7 @@ class Database:
 		i = 0
 		tables = list(self.tables.keys())
 		while i < len(tables):
+			print(i)
 			self.dropTable(tables[i])
 			i += 1
 		
