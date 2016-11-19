@@ -1,5 +1,6 @@
 import copy
 import random
+import itertools
 import numpy as np
 
 from poi_base import *
@@ -95,6 +96,38 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 		state.print_full_path()
 		
 	return best_node
+
+# Brute force searchd
+def searchBruteForce(table, wp_map, types = None):
+	
+	# First grab all of the keys
+	if not types:
+		types = list(table.data.keys())
+	else: types = [i.pCode for i in types]
+	
+	best_node = Node([])
+	
+	for type_order in itertools.permutations(types, len(types)):
+		wp_array = []
+		for wp_type in type_order:
+			wp_array.append(table.data[wp_type])
+		
+		wp_combinations = list(itertools.product(*wp_array))
+		
+		for test_wp in wp_combinations:
+			node = Node(list(test_wp))
+			
+			node_energy, node_states = waypoint_search(wp_map, node)
+			node.score = node_energy
+			node.map_states = node_states
+			
+			print(node.score)
+			
+			if node.score < best_node.score:
+				best_node = copy.deepcopy(node)
+		
+	print(best_node)
+
 		
 #Choose which mutation to apply to the node with a weighted probability p (type1 = p, type2 = 1-p)
 def randomMutation(table, node, p = 0.5):
@@ -111,8 +144,6 @@ def randomMutation(table, node, p = 0.5):
 		mut_node = type2Mutation(table, m2_node)
 	
 	return mut_node
-
-
 
 #Type 1: Randomly select 2 of the node's elements and swap their order
 def type1Mutation(m1_node):
@@ -132,8 +163,6 @@ def type1Mutation(m1_node):
 		raise Exception("No possible mutations")
 	
 	return m1_node
-
-
 
 #Type 2: Randomly select one of the node's elements and change it to an element of equal type
 def type2Mutation(table, m2_node):	
@@ -163,15 +192,12 @@ def type2Mutation(table, m2_node):
 	
 	return m2_node
 
-
-
 #Makes a Node object from a user specified path and the appropriate table in the database
 def makeNode(table, placePath):
 	nodePOIs = [table.data[place.pCode][0] for place in placePath]
 	newNode = Node(nodePOIs)
 	
 	return newNode
-
 
 ###############################################################################
 #	TEST AUTOMATION															  #
@@ -185,7 +211,6 @@ def generatePlaces(placeStrings):
 		listOfPlaces.append(Place(placeType, placeType[0]))
 	return listOfPlaces
 '''
-
 
 #Generate a list of POI objects from a placeTable
 def generateRandomPOIs(placeTable, numOfPOIs, mapSize):
@@ -247,10 +272,10 @@ if __name__ == "__main__":
 	DB.tables["Places"].addValToKey(L, "Robarts")
 
 	#Build all location TYPES
-	A = Location("ATM", "A")
-	C = Location("Coffee", "C")
-	L = Location("Library", "L")
-	H = Location("HotDog", "H")
+	A = Place("ATM", "A")
+	C = Place("Coffee", "C")
+	L = Place("Library", "L")
+	H = Place("HotDog", "H")
 	
 	#Build all locations
 	A1 = POI("BMO", A, Point(1,3))
@@ -294,41 +319,41 @@ if __name__ == "__main__":
 	
 	#Create POI table and populate it
 	DB.createTable("poiTab", "Type", ["Type", "POI"])
-	DB.tables["poiTab"].addValToKey(A.code, A1)
-	DB.tables["poiTab"].addValToKey(A.code, A2)
-	DB.tables["poiTab"].addValToKey(A.code, A3)
-	DB.tables["poiTab"].addValToKey(A.code, A4)
-	DB.tables["poiTab"].addValToKey(A.code, A5)
-	DB.tables["poiTab"].addValToKey(A.code, A6)
-	DB.tables["poiTab"].addValToKey(C.code, C1)
-	DB.tables["poiTab"].addValToKey(C.code, C2)
-	DB.tables["poiTab"].addValToKey(C.code, C3)
-	DB.tables["poiTab"].addValToKey(C.code, C4)
-	DB.tables["poiTab"].addValToKey(C.code, C5)
-	DB.tables["poiTab"].addValToKey(C.code, C6)
-	DB.tables["poiTab"].addValToKey(C.code, C7)
-	DB.tables["poiTab"].addValToKey(C.code, C8)
-	DB.tables["poiTab"].addValToKey(C.code, C9)
-	DB.tables["poiTab"].addValToKey(C.code, C10)
-	DB.tables["poiTab"].addValToKey(C.code, C11)
-	DB.tables["poiTab"].addValToKey(C.code, C12)
-	DB.tables["poiTab"].addValToKey(L.code, L1)
-	DB.tables["poiTab"].addValToKey(L.code, L2)
-	DB.tables["poiTab"].addValToKey(L.code, L3)
-	DB.tables["poiTab"].addValToKey(L.code, L4)
-	DB.tables["poiTab"].addValToKey(L.code, L5)
-	DB.tables["poiTab"].addValToKey(L.code, L6)
-	DB.tables["poiTab"].addValToKey(L.code, L7)
-	DB.tables["poiTab"].addValToKey(H.code, H1)
-	DB.tables["poiTab"].addValToKey(H.code, H2)
-	DB.tables["poiTab"].addValToKey(H.code, H3)
-	DB.tables["poiTab"].addValToKey(H.code, H4)
-	DB.tables["poiTab"].addValToKey(H.code, H5)
-	DB.tables["poiTab"].addValToKey(H.code, H6)
-	DB.tables["poiTab"].addValToKey(H.code, H7)
-	DB.tables["poiTab"].addValToKey(H.code, H8)
-	DB.tables["poiTab"].addValToKey(H.code, H9)
-	DB.tables["poiTab"].addValToKey(H.code, H10)
+	DB.tables["poiTab"].addValToKey(A.pCode, A1)
+	DB.tables["poiTab"].addValToKey(A.pCode, A2)
+	DB.tables["poiTab"].addValToKey(A.pCode, A3)
+	DB.tables["poiTab"].addValToKey(A.pCode, A4)
+	DB.tables["poiTab"].addValToKey(A.pCode, A5)
+	DB.tables["poiTab"].addValToKey(A.pCode, A6)
+	DB.tables["poiTab"].addValToKey(C.pCode, C1)
+	DB.tables["poiTab"].addValToKey(C.pCode, C2)
+	DB.tables["poiTab"].addValToKey(C.pCode, C3)
+	DB.tables["poiTab"].addValToKey(C.pCode, C4)
+	DB.tables["poiTab"].addValToKey(C.pCode, C5)
+	DB.tables["poiTab"].addValToKey(C.pCode, C6)
+	DB.tables["poiTab"].addValToKey(C.pCode, C7)
+	DB.tables["poiTab"].addValToKey(C.pCode, C8)
+	DB.tables["poiTab"].addValToKey(C.pCode, C9)
+	DB.tables["poiTab"].addValToKey(C.pCode, C10)
+	DB.tables["poiTab"].addValToKey(C.pCode, C11)
+	DB.tables["poiTab"].addValToKey(C.pCode, C12)
+	DB.tables["poiTab"].addValToKey(L.pCode, L1)
+	DB.tables["poiTab"].addValToKey(L.pCode, L2)
+	DB.tables["poiTab"].addValToKey(L.pCode, L3)
+	DB.tables["poiTab"].addValToKey(L.pCode, L4)
+	DB.tables["poiTab"].addValToKey(L.pCode, L5)
+	DB.tables["poiTab"].addValToKey(L.pCode, L6)
+	DB.tables["poiTab"].addValToKey(L.pCode, L7)
+	DB.tables["poiTab"].addValToKey(H.pCode, H1)
+	DB.tables["poiTab"].addValToKey(H.pCode, H2)
+	DB.tables["poiTab"].addValToKey(H.pCode, H3)
+	DB.tables["poiTab"].addValToKey(H.pCode, H4)
+	DB.tables["poiTab"].addValToKey(H.pCode, H5)
+	DB.tables["poiTab"].addValToKey(H.pCode, H6)
+	DB.tables["poiTab"].addValToKey(H.pCode, H7)
+	DB.tables["poiTab"].addValToKey(H.pCode, H8)
+	DB.tables["poiTab"].addValToKey(H.pCode, H9)
+	DB.tables["poiTab"].addValToKey(H.pCode, H10)
 	
 	wp_map = WaypointMapState("START", 0, None, 30, 30, # Dimensions
 					 (0,0), # Initial Position 
@@ -340,11 +365,11 @@ if __name__ == "__main__":
 
 	table = DB.tables["poiTab"]
 
-	wp_map.print_state()
+	#wp_map.print_state()
 	
-	init_node = makeNode(table, [L, C, A, H])
+	#init_node = makeNode(table, [L, C, A, H])
 	
-	init_node.score, init_path = waypoint_search(wp_map, init_node) 
+	#init_node.score, init_path = waypoint_search(wp_map, init_node) 
 	
 	'''
 	print("Initial Node")
@@ -360,11 +385,13 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 500)
+	#searchSimulatedAnnealing(wp_map, init_node, 500)
 	
-	print("\nDatabase Visualization")
-	print("======================================================")
-	print(DB)
-	print("\nRandomized POI Auto-generation")
-	print("======================================================")
-	print(generateRandomPOIs(DB.tables["Places"], 4, 10))
+	#print("\nDatabase Visualization")
+	#print("======================================================")
+	#print(DB)
+	#print("\nRandomized POI Auto-generation")
+	#print("======================================================")
+	#print(generateRandomPOIs(DB.tables["Places"], 4, 10))
+	
+	searchBruteForce(table, wp_map, [H, C, L])

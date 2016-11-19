@@ -189,7 +189,7 @@ class Place:
 	def __init__(self, pType, pCode, pDesc=''):
 		'''
 		@param pType: The type of the place (Coffee Shope, Library, etc.)
-		@param code: Single letter code for place type used for map representation
+		@param pCode: Single letter code for place type used for map representation
 		@param description: Generic description of place type (Optional)
 		'''
 		self.pType = pType
