@@ -144,7 +144,7 @@ def type2Mutation(table, m2_node):
 	#Attempt to choose an index that gives
 	while len(poi_list) < 2 and possibleChoices != []:
 		ind_mod = random.choice(possibleChoices)
-		poi_list = copy.deepcopy(table.data[m2_node.pois[ind_mod].location.code])
+		poi_list = copy.deepcopy(table.data[m2_node.pois[ind_mod].location.pCode])
 		
 		#If a poi is unique remove its node index from being a possible choice
 		if len(poi_list) < 2:
@@ -166,28 +166,85 @@ def type2Mutation(table, m2_node):
 
 
 #Makes a Node object from a user specified path and the appropriate table in the database
-def makeNode(table, locationTypePath):
-	nodePOIs = [table.data[poi_type.code][0] for poi_type in locationTypePath]
+def makeNode(table, placePath):
+	nodePOIs = [table.data[place.pCode][0] for place in placePath]
 	newNode = Node(nodePOIs)
 	
 	return newNode
 
 
-#Generate a list of Location objects without descriptions
-def generateLocationTypes(typeList):
-	listOfLocs = []
-	for locationType in typeList:
-		listOfLocs.append(Location(locationType, locationType[0]))
-	return listOfLocs
+###############################################################################
+#	TEST AUTOMATION															  #
+###############################################################################
+'''
+#Generate a list of Place objects without descriptions from input list of strings
+def generatePlaces(placeStrings):
+	listOfPlaces = []
+	for placeType in placeStrings:
+		#Make the place code the first letter of the placeType string
+		listOfPlaces.append(Place(placeType, placeType[0]))
+	return listOfPlaces
+'''
+
+
+#Generate a list of POI objects from a placeTable
+def generateRandomPOIs(placeTable, numOfPOIs, mapSize):
+	i = 0
+	pois = []
+	usedPositions = []
+	while i < numOfPOIs:
+		x = y = None
+		place = None
+		name = None
+		pos = None
+		while (x == None and y == None) or pos in usedPositions:
+			x = random.randrange(0, mapSize)
+			y = random.randrange(0, mapSize)
+			pos = Point(x, y)
+		
+		usedPositions.append(pos)
+		
+		while place is None:
+			place = random.choice(list(placeTable.data.keys()))
+			name = random.choice(list(placeTable.data[place]))
+	
+		pois.append(POI(name, place, pos))
+		i += 1
+	return(pois)
+
+
+'''
+def buildPlaceTable(db, placeList):
+	db.createTable("Places", "Place", ["Place", "Name"])
+	placeTable = db.tables["Places"]
+	
+	for place in placeList:
+		placeTable.addValToKey(place[0], place[1])
+
+
+
+def buildPOITable(db, poiList):
+	#'''
+
+
 
 if __name__ == "__main__":
 	#Build DB
 	DB = Database()
 	
-	#Build all location TYPES
-	A = Location("ATM", "A")
-	C = Location("Coffee", "C")
-	L = Location("Library", "L")
+	#Build all place TYPES
+	A = Place("ATM", "A")
+	C = Place("Coffee", "C")
+	L = Place("Library", "L")
+	
+	#Create Places table and populate it, used for random poi generation
+	DB.createTable("Places", "Place", ["Place", "Name"])
+	DB.tables["Places"].addValToKey(A, "BMO")
+	DB.tables["Places"].addValToKey(A, "RBC")
+	DB.tables["Places"].addValToKey(C, "Starbucks")
+	DB.tables["Places"].addValToKey(C, "Tim's")
+	DB.tables["Places"].addValToKey(C, "Second Cup")
+	DB.tables["Places"].addValToKey(L, "Robarts")
 	
 	#Build all locations
 	A1 = POI("BMO", A, Point(1,3))
@@ -197,13 +254,14 @@ if __name__ == "__main__":
 	C3 = POI("Second Cup", C, Point(2,2))
 	L1 = POI("Robarts", L, Point(5,5))
 	
+	#Create POI table and populate it
 	DB.createTable("poiTab", "Type", ["Type", "POI"])
-	DB.tables["poiTab"].addValToKey(A.code, A1)
-	DB.tables["poiTab"].addValToKey(A.code, A2)
-	DB.tables["poiTab"].addValToKey(C.code, C1)
-	DB.tables["poiTab"].addValToKey(C.code, C2)
-	DB.tables["poiTab"].addValToKey(C.code, C3)
-	DB.tables["poiTab"].addValToKey(L.code, L1)
+	DB.tables["poiTab"].addValToKey(A.pCode, A1)
+	DB.tables["poiTab"].addValToKey(A.pCode, A2)
+	DB.tables["poiTab"].addValToKey(C.pCode, C1)
+	DB.tables["poiTab"].addValToKey(C.pCode, C2)
+	DB.tables["poiTab"].addValToKey(C.pCode, C3)
+	DB.tables["poiTab"].addValToKey(L.pCode, L1)
 	
 	wp_map = WaypointMapState("START", 0, None, 10, 10, # Dimensions
 					 (0,0), # Initial Position 
@@ -237,4 +295,9 @@ if __name__ == "__main__":
 	#print("===========================================================")
 	searchSimulatedAnnealing(wp_map, init_node, 200)
 	
-	
+	print("\nDatabase Visualization")
+	print("======================================================")
+	print(DB)
+	print("\nRandomized POI Auto-generation")
+	print("======================================================")
+	print(generateRandomPOIs(DB.tables["Places"], 4, 10))

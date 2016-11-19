@@ -134,10 +134,10 @@ class Waypoint:
 		
 '''
 class POI(Waypoint):
-	def __init__(self, name, location, *args):
+	def __init__(self, name, place, *args):
 		'''
 		@param name: POI name (from super, cannot be empty string)
-		@param locationType: Type of location the POI is
+		@param place: Type of place the POI is
 		@param *args: Takes in variable number fo arguments for position (passed to super)
 		'''
 		#Exception handling
@@ -146,15 +146,15 @@ class POI(Waypoint):
 		if (name == '' or type(name) != str):
 			eCount += 1
 			eMsg += str(eCount) + (". POIs must have a non-empty name of type str\n")
-		if (type(location) != Location or location.lType == ''):
+		if (type(place) != Place or place.pType == ''):
 			eCount += 1
-			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Location\n")
+			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Place\n")
 		if eCount > 0:
 			eCount = 0
 			raise Exception(eMsg)
 		
 		Waypoint.__init__(self, name, *args)
-		self.location = location
+		self.location = place
 	
 	#Enables equivalence checking (i.e. == and != comparison of POI objects)	
 	def __eq__(self, other):
@@ -165,7 +165,7 @@ class POI(Waypoint):
 
 	#Enables human readable object representation
 	def __str__(self):
-		poi = str(self.location.lType) + " | " + str(self.name) + " | " + str(self.position)
+		poi = str(self.location.pType) + " | " + str(self.name) + " | " + str(self.position)
 		return str(poi)
 		
 	def __repr__(self):
@@ -175,39 +175,43 @@ class POI(Waypoint):
 
 '''
 	Class:
-		Location
+		Place
 		
 	Description:
-		Formalizes what a location is into an object. It currently contains a 
-		type and description, but can be later extended to include other 
+		Formalizes what a place is into an object. It currently contains a 
+		type, code, and description, but can be later extended to include other 
 		information.
 	
 	Notes:
 		
 '''
-class Location:
-	def __init__(self, lType, code, desc=''):
+class Place:
+	def __init__(self, pType, pCode, pDesc=''):
 		'''
-		@param lType: The type of the location (Coffee Shope, Library, etc.)
-		@param code: Single letter code for location type used for map representation
-		@param description: Generic description of location type (Optional)
+		@param pType: The type of the place (Coffee Shope, Library, etc.)
+		@param code: Single letter code for place type used for map representation
+		@param description: Generic description of place type (Optional)
 		'''
-		self.lType = lType
-		self.code = code
-		self.description = desc
+		self.pType = pType
+		self.pCode = pCode
+		self.pDesc = pDesc
 	
-	#Enables equivalence checking (i.e. == and != comparison of Location objects)
+	#Enables equivalence checking (i.e. == and != comparison of Place objects)
 	def __eq__(self, other):
-		return self.lType == other.lType and \
-		self.description == other.description and \
-		self.code == other.code
+		return self.pType == other.pType and \
+		self.pDesc == other.pDesc and \
+		self.pCode == other.pCode
 		
 	def __ne__(self, other):
 		return not self.__eq__(other)
 	
+	
+	def __hash__(self):
+		return hash((self.pType, self.pCode, self.pDesc))
+	
 	#Enables human readable object representation
 	def __str__(self):
-		return self.lType
+		return self.pType
 	
 	def __repr__(self):
 		return str(self)
@@ -245,13 +249,13 @@ class Node:
 		self.score = -1
 	
 	def types(self):
-		return [poi.location.lType for poi in self.pois]
+		return [poi.location.pType for poi in self.pois]
 	
 	def coords(self):
 		return [poi.position.toTuple() for poi in self.pois]
 	
 	def codes(self):
-		return [poi.location.code for poi in self.pois]
+		return [poi.location.pCode for poi in self.pois]
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
@@ -264,9 +268,9 @@ class Node:
 	#Enables human readable object representation
 	def __str__(self):
 		return "POIs: " + str(self.pois) + \
-				"\nLocation Types: " + str([poi.location.lType for poi in self.pois]) + \
-				"\nLocation Names: " + str([poi.name for poi in self.pois]) + \
-				"\nLocation Coord: " + str([poi.position for poi in self.pois]) + \
+				"\nPlace Types: " + str([poi.location.pType for poi in self.pois]) + \
+				"\nPlace Names: " + str([poi.name for poi in self.pois]) + \
+				"\nPlace Coord: " + str([poi.position for poi in self.pois]) + \
 				"\nPath Score: " + str(self.score)
 	
 	def __repr__(self):
@@ -279,7 +283,7 @@ class Node:
 		Constraint
 	
 	Description:
-		A binary constraint for position of Location types in a node with an
+		A binary constraint for position of Place types in a node with an
 		immediate flag to indicate whether or not a location type must be
 		immediately or loosely before another location type
 	

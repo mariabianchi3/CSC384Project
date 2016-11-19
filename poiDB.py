@@ -1,3 +1,5 @@
+import numpy as np
+
 from collections import OrderedDict
 
 '''
@@ -62,15 +64,20 @@ class Table:
 
 	#Enables human readable object representation
 	def __str__(self):
+		padding = 2
 		tableOutput = self.name + " Table\n"
 		
+		#Get a list of all keys and values in a form that can be assessed for length
+		#NOTE(SLatychev): This assumes that the values in the dict are a list of lists
+		keys = list(self.data.keys()) 
+		values = list(val for valsLst in list(self.data.values()) for val in valsLst)
+		pData = list(keys) + list(values)
+
 		#Find the longest item in the table and set the column width to that size with padding
-		pData = list(self.data.keys()) + list(self.data.values())
-		pData = [val if type(sublst) == list else sublst for sublst in pData for val in sublst]
 		if pData != []:
-			colWidth = max(len(str(val))  for val in pData) + 2
+			colWidth = max(len(str(val))  for val in pData) + padding
 		else:
-			colWidth = max(len(str(col)) for col in self.columns) + 2
+			colWidth = max(len(str(col)) for col in self.columns) + padding
 		
 		#Collect all the items of the table into a list of lists
 		items = []
