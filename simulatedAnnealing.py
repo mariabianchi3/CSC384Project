@@ -22,7 +22,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	# initial temperature, while closer to 0 corresponds to a "colder" initial
 	# temperature
 	# TODO: Explain the math behind this better
-	temp_shape_param = 50
+	temp_shape_param = 80
 	T_0 = - np.mean((wp_map.width, wp_map.height)) / np.log(temp_shape_param / 100)
 	
 	###########################################################
@@ -245,27 +245,94 @@ if __name__ == "__main__":
 	DB.tables["Places"].addValToKey(C, "Tim's")
 	DB.tables["Places"].addValToKey(C, "Second Cup")
 	DB.tables["Places"].addValToKey(L, "Robarts")
+
+	#Build all location TYPES
+	A = Location("ATM", "A")
+	C = Location("Coffee", "C")
+	L = Location("Library", "L")
+	H = Location("HotDog", "H")
 	
 	#Build all locations
 	A1 = POI("BMO", A, Point(1,3))
 	A2 = POI("RBC", A, Point(5,7))
+	A3 = POI("RBC", A, Point(15,2))
+	A4 = POI("RBC", A, Point(6,28))
+	A5 = POI("RBC", A, Point(12,18))
+	A6 = POI("RBC", A, Point(4,22))
 	C1 = POI("Starbucks", C, Point(2,8))
 	C2 = POI("Tims", C, Point(9,9))
-	C3 = POI("Second Cup", C, Point(2,2))
-	L1 = POI("Robarts", L, Point(5,5))
+	C3 = POI("Tims", C, Point(9,10))
+	C4 = POI("Tims", C, Point(14,13))
+	C5 = POI("Tims", C, Point(0,2))
+	C6 = POI("Tims", C, Point(22,5))
+	C7 = POI("Tims", C, Point(21,28))
+	C8 = POI("Tims", C, Point(3,7))
+	C9 = POI("Tims", C, Point(5,9))
+	C10 = POI("Tims", C, Point(9,12))
+	C11 = POI("Tims", C, Point(9,25))
+	C12 = POI("Tims", C, Point(15,8))
+	C13 = POI("Tims", C, Point(29,0))
+	L1 = POI("Robarts", L, Point(3,10))
+	L2 = POI("Robarts", L, Point(11,19))
+	L3 = POI("Robarts", L, Point(2,2))
+	L4 = POI("Robarts", L, Point(1,18))
+	L5 = POI("Robarts", L, Point(15,15))
+	L6 = POI("Robarts", L, Point(14,14))
+	L7 = POI("Robarts", L, Point(12,7))
+	H1 = POI("HOTDOG", H, Point(25, 23))
+	H2 = POI("HOTDOG", H, Point(1, 1))
+	H3 = POI("HOTDOG", H, Point(5, 23))
+	H4 = POI("HOTDOG", H, Point(29, 23))
+	H5 = POI("HOTDOG", H, Point(14, 2))
+	H6 = POI("HOTDOG", H, Point(18, 26))
+	H7 = POI("HOTDOG", H, Point(26, 18))
+	H8 = POI("HOTDOG", H, Point(1, 29))
+	H9 = POI("HOTDOG", H, Point(29, 1))
+	H10 = POI("HOTDOG", H, Point(24, 29))
+	
+	
 	
 	#Create POI table and populate it
 	DB.createTable("poiTab", "Type", ["Type", "POI"])
-	DB.tables["poiTab"].addValToKey(A.pCode, A1)
-	DB.tables["poiTab"].addValToKey(A.pCode, A2)
-	DB.tables["poiTab"].addValToKey(C.pCode, C1)
-	DB.tables["poiTab"].addValToKey(C.pCode, C2)
-	DB.tables["poiTab"].addValToKey(C.pCode, C3)
-	DB.tables["poiTab"].addValToKey(L.pCode, L1)
+	DB.tables["poiTab"].addValToKey(A.code, A1)
+	DB.tables["poiTab"].addValToKey(A.code, A2)
+	DB.tables["poiTab"].addValToKey(A.code, A3)
+	DB.tables["poiTab"].addValToKey(A.code, A4)
+	DB.tables["poiTab"].addValToKey(A.code, A5)
+	DB.tables["poiTab"].addValToKey(A.code, A6)
+	DB.tables["poiTab"].addValToKey(C.code, C1)
+	DB.tables["poiTab"].addValToKey(C.code, C2)
+	DB.tables["poiTab"].addValToKey(C.code, C3)
+	DB.tables["poiTab"].addValToKey(C.code, C4)
+	DB.tables["poiTab"].addValToKey(C.code, C5)
+	DB.tables["poiTab"].addValToKey(C.code, C6)
+	DB.tables["poiTab"].addValToKey(C.code, C7)
+	DB.tables["poiTab"].addValToKey(C.code, C8)
+	DB.tables["poiTab"].addValToKey(C.code, C9)
+	DB.tables["poiTab"].addValToKey(C.code, C10)
+	DB.tables["poiTab"].addValToKey(C.code, C11)
+	DB.tables["poiTab"].addValToKey(C.code, C12)
+	DB.tables["poiTab"].addValToKey(L.code, L1)
+	DB.tables["poiTab"].addValToKey(L.code, L2)
+	DB.tables["poiTab"].addValToKey(L.code, L3)
+	DB.tables["poiTab"].addValToKey(L.code, L4)
+	DB.tables["poiTab"].addValToKey(L.code, L5)
+	DB.tables["poiTab"].addValToKey(L.code, L6)
+	DB.tables["poiTab"].addValToKey(L.code, L7)
+	DB.tables["poiTab"].addValToKey(H.code, H1)
+	DB.tables["poiTab"].addValToKey(H.code, H2)
+	DB.tables["poiTab"].addValToKey(H.code, H3)
+	DB.tables["poiTab"].addValToKey(H.code, H4)
+	DB.tables["poiTab"].addValToKey(H.code, H5)
+	DB.tables["poiTab"].addValToKey(H.code, H6)
+	DB.tables["poiTab"].addValToKey(H.code, H7)
+	DB.tables["poiTab"].addValToKey(H.code, H8)
+	DB.tables["poiTab"].addValToKey(H.code, H9)
+	DB.tables["poiTab"].addValToKey(H.code, H10)
 	
-	wp_map = WaypointMapState("START", 0, None, 10, 10, # Dimensions
+	wp_map = WaypointMapState("START", 0, None, 30, 30, # Dimensions
 					 (0,0), # Initial Position 
-					 (6,9), # Desired Position 
+					 (29,29), # Desired Position 
 					 DB.tables["poiTab"], # Dict of POI... Needs thinking about...
 					 #frozenset(((2,4),(3,3))) # Obstacles
 					 frozenset(())
@@ -275,7 +342,7 @@ if __name__ == "__main__":
 
 	wp_map.print_state()
 	
-	init_node = makeNode(table, [L, C, A])
+	init_node = makeNode(table, [L, C, A, H])
 	
 	init_node.score, init_path = waypoint_search(wp_map, init_node) 
 	
@@ -293,7 +360,7 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 200)
+	searchSimulatedAnnealing(wp_map, init_node, 500)
 	
 	print("\nDatabase Visualization")
 	print("======================================================")
