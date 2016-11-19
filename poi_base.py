@@ -246,7 +246,7 @@ class Node:
 		'''
 		self.pois = pois
 		self.map_states = [] # Initialize as empty
-		self.score = -1
+		self.score = float('inf')
 	
 	def types(self):
 		return [poi.location.pType for poi in self.pois]
