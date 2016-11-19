@@ -43,6 +43,9 @@ class Point:
 	def toList(self):
 		return list((self.x, self.y)) if self.z == None else list((self.x, self.y, self.z))
 	
+	def __hash__(self):
+		return hash((self.x, self.y, self.z))
+	
 	#Enables equivalence checking (i.e. == and != comparison of Point objects)
 	def __eq__(self, other):
 		return self.x == other.x and self.y == other.y and self.z == other.z
@@ -134,27 +137,29 @@ class Waypoint:
 		
 '''
 class POI(Waypoint):
-	def __init__(self, name, place, *args):
+	def __init__(self, location, *args):
 		'''
-		@param name: POI name (from super, cannot be empty string)
-		@param place: Type of place the POI is
-		@param *args: Takes in variable number fo arguments for position (passed to super)
+		@param name: POI name is either user specified or defaulted to the location name 
+		@param location: POI location, containing standardized name, type, code, and description
+		@param *args: Takes in variable number of arguments for user defined name and position
 		'''
 		#Exception handling
 		eCount = 0
 		eMsg = 'Need to fix:\n'
-		if (name == '' or type(name) != str):
+		if (type(location) != Location):
 			eCount += 1
-			eMsg += str(eCount) + (". POIs must have a non-empty name of type str\n")
-		if (type(place) != Place or place.pType == ''):
-			eCount += 1
-			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Place\n")
+			eMsg += str(eCount) + (". POIs must have a valid, non-null, location of type Location\n")
 		if eCount > 0:
 			eCount = 0
 			raise Exception(eMsg)
 		
-		Waypoint.__init__(self, name, *args)
-		self.location = place
+		Waypoint.__init__(self, *args)
+		if self.name == '':
+			self.name = location.name
+		self.location = location
+	
+	def __hash__(self):
+		return hash((self.name, self.location, self.position))
 	
 	#Enables equivalence checking (i.e. == and != comparison of POI objects)	
 	def __eq__(self, other):
@@ -165,7 +170,9 @@ class POI(Waypoint):
 
 	#Enables human readable object representation
 	def __str__(self):
-		poi = str(self.location.pType) + " | " + str(self.name) + " | " + str(self.position)
+		poi = str(self.location.pType) + " | " + \
+				str(self.location.name) + " | " + \
+				str(self.position)
 		return str(poi)
 		
 	def __repr__(self):
@@ -192,6 +199,9 @@ class Place:
 		@param pCode: Single letter code for place type used for map representation
 		@param description: Generic description of place type (Optional)
 		'''
+		if type(pType) != str or type(pCode) != str or type(pDesc) != str:
+			raise Exception("pType, pCode, and (if provided) pDesc must be of type str")
+		
 		self.pType = pType
 		self.pCode = pCode
 		self.pDesc = pDesc
@@ -217,7 +227,55 @@ class Place:
 		return str(self)
 
 
+
+'''
+	Class:
+		Location
+	
+	Description:
+		A more specific type of location that contains a name. This is class 
+		allows more granular control when dealing with any kind of database 
+		manipulation or automating POI creation. Used for taking existing places,
+		for example a Coffee Shop, and creating all kinds of Coffee Shops like
+		Starbucks, Tim's, etc.
+	
+	Notes:
 		
+'''
+class Location(Place):
+	def __init__(self, name, *args):
+		'''
+		@param name
+		@param pType
+		@param pCode
+		@param pDesc
+		'''
+		self.name = name
+		if len(args) >=2 and len(args) <= 3:
+			Place.__init__(self, *args)
+		elif len(args) == 1 and type(args[0]) == Place:
+			self.pType = args[0].pType
+			self.pCode = args[0].pCode
+			self.pDesc = args[0].pDesc
+		
+	
+	def __eq__(self, other):
+		return self.name == other.name and Place.__eq__(self, other)
+	
+	def __ne__(self, other):
+		return not self.__eq__(other)
+	
+	def __hash__(self):
+		return hash((self.name, self.pType, self.pCode, self.pDesc))
+	
+	def __str__(self):
+		return str(self.pType) + " - " + str(self.name) 
+	
+	def __repr__(self):
+		return str(self)
+
+
+	
 '''
 	Class:
 		Node
@@ -248,14 +306,17 @@ class Node:
 		self.map_states = [] # Initialize as empty
 		self.score = float('inf')
 	
+	def names(self):
+		return [poi.location.name for poi in self.pois]
+	
 	def types(self):
 		return [poi.location.pType for poi in self.pois]
 	
-	def coords(self):
-		return [poi.position.toTuple() for poi in self.pois]
-	
 	def codes(self):
 		return [poi.location.pCode for poi in self.pois]
+	
+	def coords(self):
+		return [poi.position.toTuple() for poi in self.pois]
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
@@ -268,9 +329,9 @@ class Node:
 	#Enables human readable object representation
 	def __str__(self):
 		return "POIs: " + str(self.pois) + \
-				"\nPlace Types: " + str([poi.location.pType for poi in self.pois]) + \
-				"\nPlace Names: " + str([poi.name for poi in self.pois]) + \
-				"\nPlace Coord: " + str([poi.position for poi in self.pois]) + \
+				"\nPlace Types: " + str(self.types()) + \
+				"\nPlace Names: " + str(self.names()) + \
+				"\nPlace Coord: " + str(self.coords()) + \
 				"\nPath Score: " + str(self.score)
 	
 	def __repr__(self):
