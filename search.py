@@ -366,16 +366,6 @@ class SearchEngine:
 		#END TRACING
 		while not OPEN.empty():
 			node = OPEN.extract()
-
-			# Check parent node
-			#print('Parent Node: ')
-			#node.state.print_state()
-			'''
-			print('\n')
-			print(self.cc_dictionary)
-			print('\n')
-			OPEN.print_open()
-			'''
 			
 			#BEGIN TRACING
 			if self.trace:
