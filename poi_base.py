@@ -1,3 +1,5 @@
+import numpy as np
+
 ###############################################################################
 ''' 
 	Basic class definitions that will be used in the Waypoint search project
@@ -381,6 +383,13 @@ class Constraint:
 	def __repr__(self):
 		return str(self)
 
+	def isValidNode(self, node):
+		locations = [poi.location for poi in node.pois]
+		
+		var1_ind = locations.index(self.var1)
+		var2_ind = locations.index(self.var2)
+		
+		return (var1_ind < var2_ind and not self.immediate) or (var2_ind-var1_ind == 1 and self.immediate)  		
 
 '''
 	Class:
@@ -403,6 +412,13 @@ class CSP:
 	
 	def getAllConstraints(self):
 		return self.cons
+	
+	# Check a node against all constraints in the CSP
+	def checkAllCons(self, node):
+		for con in self.cons:
+			if not con.isValidNode(node): return False
+		return True
+		
 	
 	def _dropCSP(self):
 		while self.cons != []:
