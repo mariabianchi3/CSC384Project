@@ -35,8 +35,11 @@ def waypoint_search(initial_state, node):
 	score = 0
 	
 	se = SearchEngine('astar', 'full')
+	#se = SearchEngine('custom', 'full')
+	w = 1.0
+	
 	se.trace_on(0)	
-	timebound = 1
+	timebound = 2
 	
 	initial_state_copy = copy.deepcopy(initial_state)
 	
@@ -64,17 +67,17 @@ def waypoint_search(initial_state, node):
 		initial_state_copy.cur_end = end
 		
 		attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound)
-		attempt.global_start = initial_state_copy.global_start
-		attempt.global_end = initial_state_copy.global_end
-		
-		# Collect the results of the search
-		path_steps.append(attempt)
-		
+		#attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist) # No timebound
+		#attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound, fval_function, w)
+
 		if attempt:
-			#attempt.print_full_path()
 			score += attempt.gval
+			attempt.global_start = initial_state_copy.global_start
+			attempt.global_end = initial_state_copy.global_end		
+			# Collect the results of the search
+			path_steps.append(attempt)	
 		else:
-			return 1000
+			return float('inf'), False
 			
 	# Also return score
 	return score, path_steps

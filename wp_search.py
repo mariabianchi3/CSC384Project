@@ -92,6 +92,9 @@ class WaypointMapState(StateSpace):
 				tup_pos = poi.position.toTuple()
 				map[tup_pos[1]][tup_pos[0]] = key
 
+		# Agent location
+		map[self.cur_start[1]][self.cur_start[0]] = '%'
+
 		# And of course the obstacles
 		for obstacle in self.obstacles:
 			map[obstacle[1]][obstacle[0]] = '#'

@@ -8,11 +8,11 @@ from poiDB import *
 from wp_search import *
 from wp_search_helpers import *
 from NameGenerator import *
+from visualization_helpers import *
 
 # Perform search with simulated annealing.
 # TODO: Make sure user inputs make sense / we have all that we want
-def searchSimulatedAnnealing(wp_map, init_node, iter_max):
-
+def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):	
 	###########################################################
 	# Step 1: Initialize all algorithm specific parameters	#
 	###########################################################
@@ -24,7 +24,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	# initial temperature, while closer to 0 corresponds to a "colder" initial
 	# temperature
 	# TODO: Explain the math behind this better
-	temp_shape_param = 80
+	temp_shape_param = 70
 	T_0 = - np.mean((wp_map.width, wp_map.height)) / np.log(temp_shape_param / 100)
 	
 	###########################################################
@@ -37,7 +37,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	target = open('MATLAB/simulated_annealing_output.txt', 'w') #TODO: How to integrate this? 
 	
 	###########################################################
-	# Step 3: Iterate iter_max times and perform search	   #
+	# Step 3: Iterate iter_max times and perform search	  	  #
 	###########################################################
 	for i in range(0, iter_max):
 		# Current temperature
@@ -45,11 +45,20 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 		#	   Problem with this is that it needs to go to zero at iter_max
 		#	   So I'm not too sure if it's a smart idea to let the user play 
 		#	   with this...
-		T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
 		
+		# Straight Line
+		#T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
+		c = 1.125
+		T_cur = T_0 * c**(-i/10)
+
 		# Now mutate the parent node
 		child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
 		
+		# Keep mutating until it is valid
+		# TODO: This isn't terribly smart but it'll work...
+		while not csp.checkAllCons(child_node):
+			child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
+				
 		# TODO: Add constraint checking portion!!!
 		
 		# Calculate energies
@@ -84,14 +93,11 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 		str_out = '\t'.join(map(str, output_data)) + '\n' 
 		target.write(str_out)
 		
+		# Print Progress to Terminal
+		printProgress(i, iter_max-1, 'Running SA Algorithm')
+		
 	# Algorithm is complete. Return best node found so far
 	print("\n================ DONE!!! =======================\n")
-	
-	wp_map.print_state()
-	
-	print(best_node)
-	
-	print('\n')
 	
 	for state in best_node.map_states:
 		state.print_full_path()
@@ -99,7 +105,7 @@ def searchSimulatedAnnealing(wp_map, init_node, iter_max):
 	return best_node
 
 # Brute force searchd
-def searchBruteForce(table, wp_map, types = None):
+def searchBruteForce(table, wp_map, csp, types = None):
 	
 	# First grab all of the keys
 	if not types:
@@ -117,7 +123,7 @@ def searchBruteForce(table, wp_map, types = None):
 		
 		for test_wp in wp_combinations:
 			node = Node(list(test_wp))
-			
+						
 			node_energy, node_states = waypoint_search(wp_map, node)
 			node.score = node_energy
 			node.map_states = node_states
@@ -301,16 +307,13 @@ def generateRandomPOIs(placeTable, numOfPOIs, mapSize):
 	#print(set(pois))
 	return list(set(pois)) 
 
-
-
+#TODO: Name not passed in? Not good.
 #Build the POI Table from a list of POIs
 def buildPOITable(db, poiList):
 	db.createTable("poiTab", "Location Code", ["Location Code", "POI"])
 	poiTab = db.tables["poiTab"]
 	for poi in poiList:
 		poiTab.addValToKey(poi.location.pCode, poi)
-
-
 
 #Randomly generate a path: list of location types
 def generateRandomPath(DB, poiTable):
@@ -327,125 +330,46 @@ def generateRandomPath(DB, poiTable):
 		path.append(locTypes[locIndx])
 	return path
 
-
-
-
 if __name__ == "__main__":
 	#Build DB
 	DB = Database()
+	table_name = "poiTab"
+	DB.createTable(table_name, "Type", ["Place", "Location"])
 	
-	#Make random place types
-	placeTypes = generateRandomPlaceTypes(10)
+	table = DB.tables[table_name]	
 	
-	#From random place types, make list of Place objects
-	places = generatePlaces(placeTypes)
-	
-	
-	#Make random location names
-	locationNames = generateRandomLocationNames(20)
-	
-	#From random location names, make list of Location objects
-	locations = generateLocations(places, locationNames)
-	
-	#Build the place Table
-	buildPlaceTable(DB, locations)
-	
-	
-	#Now that the place table has been created, make random POIS
-	placeTable = DB.tables["Places"]
-	pois = generateRandomPOIs(placeTable, 10, 10)
-	
-	#Build the POI Table
-	buildPOITable(DB, pois)
-	
-	#Build a random path of location types for node creation
-	poiTable = DB.tables["poiTab"]
-	#print(DB)
-	path = generateRandomPath(DB, poiTable)
-	print("PATH: " + str(path))
-	
-	#Build Map and Node
-	wp_map = WaypointMapState("START", 0, None, 10, 10, # Dimensions
-					 (0,0), # Initial Position 
-					 (9,9), # Desired Position 
-					 poiTable, # Dict of POI... Needs thinking about...
-					 #frozenset(((2,4),(3,3))) # Obstacles
-					 frozenset(())
-					)
-	
-	init_node = makeNode(poiTable, path)
-	
-	init_node.score, init_path = waypoint_search(wp_map, init_node)
-	
-	'''
-	#Build all place TYPES
-	A = Place("ATM", "A")
-	C = Place("Coffee", "C")
-	L = Place("Library", "L")
-	
-	
-	#Create Places table and populate it, used for random poi generation
-	DB.createTable("Places", "Place", ["Place", "Name"])
-	DB.tables["Places"].addValToKey(A, "BMO")
-	DB.tables["Places"].addValToKey(A, "RBC")
-	DB.tables["Places"].addValToKey(C, "Starbucks")
-	DB.tables["Places"].addValToKey(C, "Tim's")
-	DB.tables["Places"].addValToKey(C, "Second Cup")
-	DB.tables["Places"].addValToKey(L, "Robarts")
-	
-
-	#Build all Places
-	A = Place("ATM", "A")
-	C = Place("Coffee", "C")
-	L = Place("Library", "L")
-	H = Place("HotDog", "H")
-	
-	#Build a few Locations
-	RBC = Location("RBC", A)
-	BMO = Location("BMO", A)
-	Starbucks = Location("Starbucks", C)
-	Tims = Location("Tims", C)
-	SecondCup = Location("Second Cup", C)
-	Robarts = Location("Robarts", L)
-	H = Location("HOTDOG", H)
-	
-	#Create Places table and populate it, used for random poi generation
-	DB.createTable("Places", "Place", ["Place", "Location"])
-	DB.tables["Places"].addValToKey(A, BMO)
-	DB.tables["Places"].addValToKey(A, RBC)
-	DB.tables["Places"].addValToKey(C, Starbucks)
-	DB.tables["Places"].addValToKey(C, Tims)
-	DB.tables["Places"].addValToKey(C, SecondCup)
-	DB.tables["Places"].addValToKey(L, Robarts)
-	
+	A = Location('ATM', 'ATM', 'A')
+	C = Location('Coffee', 'Coffee', 'C')
+	L = Location('Library', 'Library', 'L')
+	H = Location('Hotdog', 'Hotdog', 'H')
 	
 	#Build all locations
-	A1 = POI(BMO, Point(1,3))
-	A2 = POI(RBC, Point(5,7))
-	A3 = POI(RBC, Point(15,2))
-	A4 = POI(RBC, Point(6,28))
-	A5 = POI(RBC, Point(12,18))
-	A6 = POI(RBC, Point(4,22))
-	C1 = POI(Starbucks, Point(2,8))
-	C2 = POI(Tims, Point(9,9))
-	C3 = POI(Tims, Point(9,10))
-	C4 = POI(Tims, Point(14,13))
-	C5 = POI(Tims, Point(0,2))
-	C6 = POI(Tims, Point(22,5))
-	C7 = POI(Tims, Point(21,28))
-	C8 = POI(Tims, Point(3,7))
-	C9 = POI(Tims, Point(5,9))
-	C10 = POI(Tims, Point(9,12))
-	C11 = POI(Tims, Point(9,25))
-	C12 = POI(Tims, Point(15,8))
-	C13 = POI(Tims, Point(29,0))
-	L1 = POI(Robarts, Point(3,10))
-	L2 = POI(Robarts, Point(11,19))
-	L3 = POI(Robarts, Point(2,2))
-	L4 = POI(Robarts, Point(1,18))
-	L5 = POI(Robarts, Point(15,15))
-	L6 = POI(Robarts, Point(14,14))
-	L7 = POI(Robarts, Point(12,7))
+	A1 = POI(A, Point(1,3))
+	A2 = POI(A, Point(5,7))
+	A3 = POI(A, Point(15,2))
+	A4 = POI(A, Point(6,28))
+	A5 = POI(A, Point(12,18))
+	A6 = POI(A, Point(4,22))
+	C1 = POI(C, Point(2,8))
+	C2 = POI(C, Point(9,9))
+	C3 = POI(C, Point(9,10))
+	C4 = POI(C, Point(14,13))
+	C5 = POI(C, Point(0,2))
+	C6 = POI(C, Point(22,5))
+	C7 = POI(C, Point(21,28))
+	C8 = POI(C, Point(3,7))
+	C9 = POI(C, Point(5,9))
+	C10 = POI(C, Point(9,12))
+	C11 = POI(C, Point(9,25))
+	C12 = POI(C, Point(15,8))
+	C13 = POI(C, Point(29,0))
+	L1 = POI(L, Point(3,10))
+	L2 = POI(L, Point(11,19))
+	L3 = POI(L, Point(2,2))
+	L4 = POI(L, Point(1,18))
+	L5 = POI(L, Point(15,15))
+	L6 = POI(L, Point(14,14))
+	L7 = POI(L, Point(12,7))
 	H1 = POI(H, Point(25, 23))
 	H2 = POI(H, Point(1, 1))
 	H3 = POI(H, Point(5, 23))
@@ -457,64 +381,104 @@ if __name__ == "__main__":
 	H9 = POI(H, Point(29, 1))
 	H10 = POI(H, Point(24, 29))
 	
-	
-	
 	#Create POI table and populate it
-	DB.createTable("poiTab", "Type", ["Type", "POI"])
-	DB.tables["poiTab"].addValToKey(A.pCode, A1)
-	DB.tables["poiTab"].addValToKey(A.pCode, A2)
-	DB.tables["poiTab"].addValToKey(A.pCode, A3)
-	DB.tables["poiTab"].addValToKey(A.pCode, A4)
-	DB.tables["poiTab"].addValToKey(A.pCode, A5)
-	DB.tables["poiTab"].addValToKey(A.pCode, A6)
-	DB.tables["poiTab"].addValToKey(C.pCode, C1)
-	DB.tables["poiTab"].addValToKey(C.pCode, C2)
-	DB.tables["poiTab"].addValToKey(C.pCode, C3)
-	DB.tables["poiTab"].addValToKey(C.pCode, C4)
-	DB.tables["poiTab"].addValToKey(C.pCode, C5)
-	DB.tables["poiTab"].addValToKey(C.pCode, C6)
-	DB.tables["poiTab"].addValToKey(C.pCode, C7)
-	DB.tables["poiTab"].addValToKey(C.pCode, C8)
-	DB.tables["poiTab"].addValToKey(C.pCode, C9)
-	DB.tables["poiTab"].addValToKey(C.pCode, C10)
-	DB.tables["poiTab"].addValToKey(C.pCode, C11)
-	DB.tables["poiTab"].addValToKey(C.pCode, C12)
-	DB.tables["poiTab"].addValToKey(L.pCode, L1)
-	DB.tables["poiTab"].addValToKey(L.pCode, L2)
-	DB.tables["poiTab"].addValToKey(L.pCode, L3)
-	DB.tables["poiTab"].addValToKey(L.pCode, L4)
-	DB.tables["poiTab"].addValToKey(L.pCode, L5)
-	DB.tables["poiTab"].addValToKey(L.pCode, L6)
-	DB.tables["poiTab"].addValToKey(L.pCode, L7)
-	DB.tables["poiTab"].addValToKey(H.pCode, H1)
-	DB.tables["poiTab"].addValToKey(H.pCode, H2)
-	DB.tables["poiTab"].addValToKey(H.pCode, H3)
-	DB.tables["poiTab"].addValToKey(H.pCode, H4)
-	DB.tables["poiTab"].addValToKey(H.pCode, H5)
-	DB.tables["poiTab"].addValToKey(H.pCode, H6)
-	DB.tables["poiTab"].addValToKey(H.pCode, H7)
-	DB.tables["poiTab"].addValToKey(H.pCode, H8)
-	DB.tables["poiTab"].addValToKey(H.pCode, H9)
-	DB.tables["poiTab"].addValToKey(H.pCode, H10)
+	DB.tables[table_name].addValToKey(A.pCode, A1)
+	DB.tables[table_name].addValToKey(A.pCode, A2)
+	DB.tables[table_name].addValToKey(A.pCode, A3)
+	DB.tables[table_name].addValToKey(A.pCode, A4)
+	DB.tables[table_name].addValToKey(A.pCode, A5)
+	DB.tables[table_name].addValToKey(A.pCode, A6)
+	DB.tables[table_name].addValToKey(C.pCode, C1)
+	DB.tables[table_name].addValToKey(C.pCode, C2)
+	DB.tables[table_name].addValToKey(C.pCode, C3)
+	DB.tables[table_name].addValToKey(C.pCode, C4)
+	DB.tables[table_name].addValToKey(C.pCode, C5)
+	DB.tables[table_name].addValToKey(C.pCode, C6)
+	DB.tables[table_name].addValToKey(C.pCode, C7)
+	DB.tables[table_name].addValToKey(C.pCode, C8)
+	DB.tables[table_name].addValToKey(C.pCode, C9)
+	DB.tables[table_name].addValToKey(C.pCode, C10)
+	DB.tables[table_name].addValToKey(C.pCode, C11)
+	DB.tables[table_name].addValToKey(C.pCode, C12)
+	DB.tables[table_name].addValToKey(L.pCode, L1)
+	DB.tables[table_name].addValToKey(L.pCode, L2)
+	DB.tables[table_name].addValToKey(L.pCode, L3)
+	DB.tables[table_name].addValToKey(L.pCode, L4)
+	DB.tables[table_name].addValToKey(L.pCode, L5)
+	DB.tables[table_name].addValToKey(L.pCode, L6)
+	DB.tables[table_name].addValToKey(L.pCode, L7)
+	DB.tables[table_name].addValToKey(H.pCode, H1)
+	DB.tables[table_name].addValToKey(H.pCode, H2)
+	DB.tables[table_name].addValToKey(H.pCode, H3)
+	DB.tables[table_name].addValToKey(H.pCode, H4)
+	DB.tables[table_name].addValToKey(H.pCode, H5)
+	DB.tables[table_name].addValToKey(H.pCode, H6)
+	DB.tables[table_name].addValToKey(H.pCode, H7)
+	DB.tables[table_name].addValToKey(H.pCode, H8)
+	DB.tables[table_name].addValToKey(H.pCode, H9)
+	DB.tables[table_name].addValToKey(H.pCode, H10)
+	
+	obs_list = []
+	''' '''
+	# BIG WALL	
+	wall_y = 21
+	for i in range(0,21):
+		obs_list.append((i,wall_y))
+	
+	wall_x = 20
+	for i in range(1,21):
+		obs_list.append((wall_x,i))
 	
 	
-	wp_map = WaypointMapState("START", 0, None, 30, 30, # Dimensions
-					 (0,0), # Initial Position 
-					 (29,29), # Desired Position 
-					 DB.tables["poiTab"], # Dict of POI... Needs thinking about...
-					 #frozenset(((2,4),(3,3))) # Obstacles
-					 frozenset(())
-					)
+	'''
+	# SMALL WALL	
+	wall_y = 7
+	for i in range(0,7):
+		obs_list.append((i,wall_y))
+	
+	wall_x = 7
+	for i in range(1,7):
+		obs_list.append((wall_x,i))
+	'''
+	
+	#obs_list = [(28,28),(27,28),(28,27),(29,27)]
+	
+	obs_list = tuple(obs_list)
 
-	table = DB.tables["poiTab"]
-
-	#wp_map.print_state()
+	wp_map_1 = WaypointMapState("START", 0, None, 30, 30, # Dimensions
+								(0,0), # Initial Position 
+								(29,29), # Desired Position 
+								DB.tables[table_name], # Dict of POI... Needs thinking about...
+								#frozenset(((2,4),(3,3))) # Obstacles
+								frozenset(())
+								)
 	
-	init_node = makeNode(table, [L, C, A, H])
+	wp_map_2 = WaypointMapState("START", 0, None, 30, 30, # Dimensions
+								(0,0), # Initial Position 
+								(29,29), # Desired Position 
+								DB.tables[table_name], # Dict of POI... Needs thinking about...
+								frozenset(( obs_list ))
+								)	
+
+	wp_map = wp_map_2
+
+	wp_map.print_state()
+	
+	init_node = makeNode(table, [A.pCode, H.pCode, L.pCode, C.pCode])
+	#init_node = makeNode(table, [])
 	
 	init_node.score, init_path = waypoint_search(wp_map, init_node) 
+
+
+	csp = CSP('csp1')
+	
+	con1 = Constraint('con1', A, C, True) # ATM immediately before coffee
+	csp.addConstraint(con1)	
+	con2 = Constraint('con2', L, H, True) # Library at least before Hotdog
+	csp.addConstraint(con2)
 	
 	
+	'''
 	print("Initial Node")
 	print("===========================================================")
 	print(init_node)
@@ -528,7 +492,9 @@ if __name__ == "__main__":
 	
 	#print("\nSimulated Annealing Test Run")	
 	#print("===========================================================")
-	searchSimulatedAnnealing(wp_map, init_node, 500)
+	best_node = searchSimulatedAnnealing(wp_map, init_node, csp, 300)
+	
+	print(best_node)
 	
 	#print("\nDatabase Visualization")
 	#print("======================================================")
