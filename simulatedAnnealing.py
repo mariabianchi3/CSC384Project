@@ -2,6 +2,7 @@ import copy
 import random
 import itertools
 import numpy as np
+import builtins
 
 from poi_base import *
 from poiDB import *
@@ -157,25 +158,49 @@ def searchBruteForce(table, wp_map, csp, types = None):
 	
 	best_node = Node([])
 	
+	# Counter for location type combinations
+	i = 0
+	type_combs = np.math.factorial(len(types))
+	
+	# Iterate over all type orderings
 	for type_order in itertools.permutations(types, len(types)):
 		wp_array = []
+
 		for wp_type in type_order:
 			wp_array.append(table.data[wp_type])
 		
-		wp_combinations = list(itertools.product(*wp_array))
 		
+		wp_combinations = list(itertools.product(*wp_array))
+		len_wp = len(wp_combinations)
+		j = 0 # Counter for specific waypoint combinations
+		valid_ordering = False
+		
+		# Iterate over POI combinations
 		for test_wp in wp_combinations:
 			node = Node(list(test_wp))
+					
+			# If the node fails then we don't need to test any others
+			# in this location ordering because they will all be invalid.
+			# Note this is only because constraints operate over location types
+			# only.	
+			if valid_ordering:
+				pass
+			elif not csp.checkAllCons(node):
+				break
+			else: valid_ordering = True
 						
 			node_energy, node_states = waypoint_search(wp_map, node)
 			node.score = node_energy
 			node.map_states = node_states
-			
-			print(node.score)
-			
+						
 			if node.score < best_node.score:
 				best_node = copy.deepcopy(node)
 		
+			j = j + 1
+			printProgress(i*len_wp + j, type_combs*len_wp, 'Executing BF Search')
+		i = i + 1
+	print('\n')
+	
 	print(best_node)
 
 

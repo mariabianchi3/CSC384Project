@@ -8,9 +8,11 @@
 ####################################
 from search import *
 from wp_search import *
+
 import numpy as np
 import sys
 import copy
+import builtins # For extremely hacky cache dictionary...
 
 ####################################
 #		   Heuristics			   #
@@ -46,16 +48,8 @@ def waypoint_search(initial_state, node):
 	# TODO: Currently we will collect all results from the searches, and 
 	#       return this list so that the user can see what the steps were.
 	path_steps = []
-	
-	# Make new copy of location tuples
-	#NOTE(To: Adrian, From: Stefan):
-	#		The Node class has been changed, it now only contains pois
-	#		Added coords() and types() functions to avoid constant list comprehension
-	
-	# =====OLD WAY=====
-	#POI = copy.deepcopy(node.positions)
-	
-	# =====NEW WAY=====
+
+	# Grab just the coordinates
 	POI = node.coords()
 	
 	# Add the global start and goal locations to the list
@@ -65,10 +59,12 @@ def waypoint_search(initial_state, node):
 	for start, end in zip(POI[0:len(POI)-1], POI[1:len(POI)]):
 		initial_state_copy.cur_start = start
 		initial_state_copy.cur_end = end
-		
-		attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound)
-		#attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist) # No timebound
-		#attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound, fval_function, w)
+
+		# Cache solved paths for increased speed
+		if (start,end) not in builtins.solved_paths.keys():
+			attempt = se.search(initial_state_copy, waypoint_map_goal_state, heur_manhattan_dist, timebound)
+			builtins.solved_paths[(start,end)] = attempt
+		else: attempt = builtins.solved_paths[(start,end)]
 
 		if attempt:
 			score += attempt.gval

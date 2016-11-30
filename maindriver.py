@@ -11,6 +11,9 @@ from visualization_helpers import *
 
 import sys
 import numpy as np
+import time
+import builtins
+builtins.solved_paths = {}
 
 ###########################
 #     1: Build DB         #
@@ -50,7 +53,7 @@ C12 = POI(C, Point(15,8))
 C13 = POI(C, Point(29,0))
 L1 = POI(L, Point(3,10))
 L2 = POI(L, Point(11,19))
-L3 = POI(L, Point(2,2))
+L3 = POI(L, Point(5,5))
 L4 = POI(L, Point(1,18))
 L5 = POI(L, Point(15,15))
 L6 = POI(L, Point(14,14))
@@ -109,10 +112,10 @@ DB.tables[table_name].addValToKey(H.pCode, H10)
 ###########################
 csp = CSP('csp1')
 
-con1 = Constraint('con1', A, C, True) # ATM immediately before Coffee (NEED MONEY!)
+con1 = Constraint('con1', A, C, False) # ATM at least before Coffee (NEED MONEY!)
 csp.addConstraint(con1)
-con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
-csp.addConstraint(con2)
+#con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
+#csp.addConstraint(con2)
 
 
 ###########################
@@ -164,14 +167,23 @@ test_T50 = False
 
 # Remember that T_50 is Map and Table specific! 
 if test_T50:
-	T_test = list(np.arange(5,40,1))
-	iters = 10
+	T_test = list(np.arange(1,100,3))
+	iters = 40
 	T_50 = findT50(table, wp_map, T_test, search_poi_codes, iters)
-else: T_50 = 24 # Found from previous experiments
-
+else: T_50 = 25 # Found from previous experiments
 
 init_node = makeNode(table, search_poi_codes)
 init_node.score, init_path = waypoint_search(wp_map, init_node) 
+
+print(init_node)
+
+start_bf = time.time()
+searchBruteForce(table, wp_map, csp)
+end_bf = time.time()
+
+print('Time Elapsed (BF Method): ', end_bf-start_bf)
+
+sys.exit(0)
 
 
 #print("\nSimulated Annealing Test Run")	
