@@ -258,18 +258,22 @@ def type2Mutation(table, m2_node, calledFromOtherMutation):
 #Makes a Node object from a user specified path and the appropriate table in the database
 def makeNode(table, pCodePath):
 	pois = []
+	
+	shuffledPCodes = copy.deepcopy(pCodePath)
+	random.shuffle(shuffledPCodes, random.random)
+	
 	#Go through all the path codes
-	for pCode in pCodePath:
+	for pCode in shuffledPCodes:
 		#Ensure we don't add a duplicate POI to the path
-		i = 0
+		i = random.randrange(0, len(table.data[pCode]))
 		while i < len(table.data[pCode]) and table.data[pCode][i] in pois:
-			i += 1
+			i = random.randrange(0, len(table.data[pCode]))
 		#If we've exhausted all pois with key pCode then don't add the poi
 		if i >= len(table.data[pCode]):
 			continue
 		else:
 			pois.append(table.data[pCode][i])
-			
+		
 	nodePOIs = pois
 	newNode = Node(nodePOIs)
 	
