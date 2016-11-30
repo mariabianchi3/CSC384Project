@@ -34,7 +34,7 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):
 	best_score, best_steps = waypoint_search(wp_map, best_node) # Need to load it with a score
 	
 	parent_node = copy.deepcopy(init_node)
-	target = open('MATLAB/simulated_annealing_output.txt', 'w') #TODO: How to integrate this? 
+	target = open('MATLAB/simulated_annealing_output.txt', 'w')
 	
 	###########################################################
 	# Step 3: Iterate iter_max times and perform search	  	  #
@@ -49,7 +49,7 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):
 		# Straight Line
 		#T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
 		c = 1.125
-		T_cur = T_0 * c**(-i/10)
+		T_cur = schedule(T_0, c, i/10)
 
 		# Now mutate the parent node
 		child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
@@ -104,6 +104,55 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):
 		
 	return best_node
 
+# The schedule function returns the current temperature 
+# given some cooling parameter 'c' and the current time 't'
+def schedule(T0, c, t_cur):
+	return T0*c**t_cur
+
+# Performs an analysis of acceptance probability as a function of 
+# initial temperature and returns the temperature that gives us 
+# (as close as possible) an acceptance probability of 50%
+def findT50(table, wp_map, T_test, search_poi_codes, iters):
+	target = open('MATLAB/T50_results.txt', 'w')
+
+	p_ave = []
+	p_std = []
+	T_save = []
+
+	for T0 in T_test:
+	
+		p_vect = []
+		for i in range(iters):
+			# TODO: Ensure that makeNode is RANDOM!!!
+			parent_node = makeNode(table, search_poi_codes)
+			child_node = randomMutation(table, parent_node) # Use default p=0.2
+			
+			parent_energy, parent_map_states = waypoint_search(wp_map, parent_node)
+			child_energy, child_map_states = waypoint_search(wp_map, child_node)
+			
+			deltaE = parent_energy - child_energy
+			
+			if deltaE < 0:
+				p_vect.append( np.exp(deltaE / T0) )
+				
+			# Print Progress to Terminal
+			printProgress(T_test.index(T0)*iters+i, len(T_test)*iters, 'Finding T_50')
+
+				
+		if p_vect: # p_vect cannot be empty
+			T_save.append(T0)
+			p_ave.append(np.mean(p_vect))
+			p_std.append(np.std(p_vect))
+			
+			# Log information to file
+			output_data = [T_save[-1], p_ave[-1], p_std[-1]]
+			str_out = '\t'.join(map(str, output_data)) + '\n' 
+			target.write(str_out)
+	
+	print('\n')				
+	T_50 = T_test[np.abs(np.array(p_ave) - 0.5).argmin()]
+	return T_50
+			
 # Brute force searchd
 def searchBruteForce(table, wp_map, csp, types = None):
 	
@@ -135,9 +184,14 @@ def searchBruteForce(table, wp_map, csp, types = None):
 		
 	print(best_node)
 
-		
-#Choose which mutation to apply to the node with a weighted probability p (type1 = p, type2 = 1-p)
-def randomMutation(table, node, p = 0.5):
+
+# Choose which mutation to apply to the node with a weighted probability p (type1 = p, type2 = 1-p)
+# The default value here will be 20% for Type 1 Mutations. Why you may ask? 
+# This is because generally there will be many more waypoints than waypoint types
+# which means that it doesn't make sense to perform an equal number of 
+# Type 1 and Type 2 mutations. Of course, the user can enter whatever value they
+# want for 'p' if they see fit to use something else...
+def randomMutation(table, node, p = 0.2):
 	if type(node) != Node:
 		raise Exception("node must be of type Node")
 	
@@ -226,107 +280,6 @@ def makeNode(table, pCodePath):
 	newNode = Node(nodePOIs)
 	
 	return newNode
-
-###############################################################################
-#	TEST AUTOMATION															  #
-###############################################################################
-
-#Generate random place types
-def generateRandomPlaceTypes(numOfTypes):
-	placeTypes = []
-	for i in range(0, numOfTypes):
-		placeTypes.append(generateRandomName(-1, True))
-	return placeTypes
-
-
-
-#Generate a list of random location names
-def generateRandomLocationNames(numOfNames):
-	locationNames = []
-	for i in range(0, numOfNames):
-		locationNames.append(generateRandomName(-1, False, True))
-	return locationNames
-
-
-
-#Generate a list of Place objects without descriptions from input list of strings
-def generatePlaces(placeStrings):
-	listOfPlaces = []
-	for placeType in placeStrings:
-		#Make the place code the first letter of the placeType string
-		listOfPlaces.append(Place(placeType, placeType[0]))
-	return listOfPlaces
-
-
-
-#Generate a list of Location objects
-def generateLocations(placeList, listOfNames):
-	listOfLocations = []
-	for name in listOfNames:
-		place = random.randrange(0, len(placeList))
-		listOfLocations.append(Location(name, placeList[place]))
-	return listOfLocations
-
-
-#Build a Place table where key isPlace object, and values are associated Location objects
-def buildPlaceTable(db, locationList):
-	db.createTable("Places", "Place", ["Place", "Location"])
-	placeTable = db.tables["Places"]
-	
-	for location in locationList:
-		placeTable.addValToKey(Place(location.pType, location.pCode, location.pDesc), location)
-	
-
-#Generate a list of POI objects from a placeTable
-def generateRandomPOIs(placeTable, numOfPOIs, mapSize):
-	i = 0
-	pois = []
-	usedPositions = []
-	while i < numOfPOIs:
-		x = y = None
-		place = None
-		name = None
-		pos = None
-		while (x == None and y == None) or pos in usedPositions:
-			x = random.randrange(0, mapSize)
-			y = random.randrange(0, mapSize)
-			pos = Point(x, y)
-		
-		usedPositions.append(pos)
-		
-		while place is None:
-			place = random.choice(list(placeTable.data.keys()))
-			location = random.choice(list(placeTable.data[place]))
-		
-		pois.append(POI(location, pos))
-		i += 1
-	#print(pois)
-	#print(usedPositions)
-	#print(set(pois))
-	return list(set(pois)) 
-
-#TODO: Name not passed in? Not good.
-#Build the POI Table from a list of POIs
-def buildPOITable(db, poiList):
-	db.createTable("poiTab", "Location Code", ["Location Code", "POI"])
-	poiTab = db.tables["poiTab"]
-	for poi in poiList:
-		poiTab.addValToKey(poi.location.pCode, poi)
-
-#Randomly generate a path: list of location types
-def generateRandomPath(DB, poiTable):
-	print("IN PATH GENERATION")
-	print(poiTable)
-	locTypes = list(poiTable.data.keys())
-	print("ALL LOCATION TYPES: " + str(locTypes))
-	numOfLocs = random.randrange(2, len(locTypes))
-	
-	path = []
-	for loc in range(0, numOfLocs):
-		locIndx = random.randrange(0, len(locTypes))
-		print(locTypes[locIndx])
-		path.append(locTypes[locIndx])
-	return path
 
 if __name__ == "__main__":
 	pass

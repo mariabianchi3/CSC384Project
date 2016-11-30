@@ -1,21 +1,34 @@
-#################################
-#          Imports              #
-#################################
+#####################################################
+#                     Imports                       #
+#####################################################
 from simulatedAnnealing import *
+from poi_base import *
+from poiDB import *
+from wp_search import *
+from wp_search_helpers import *
+from NameGenerator import *
+from visualization_helpers import *
 
-#Build DB
+import sys
+import numpy as np
+
+###########################
+#     1: Build DB         #
+###########################
+
 DB = Database()
 table_name = "poiTab"
 DB.createTable(table_name, "Type", ["Place", "Location"])
 
 table = DB.tables[table_name]	
-
+	
+# Location types
 A = Location('ATM', 'ATM', 'A')
 C = Location('Coffee', 'Coffee', 'C')
 L = Location('Library', 'Library', 'L')
 H = Location('Hotdog', 'Hotdog', 'H')
 
-#Build all locations
+# Build all locations
 A1 = POI(A, Point(1,3))
 A2 = POI(A, Point(5,7))
 A3 = POI(A, Point(15,2))
@@ -53,7 +66,7 @@ H8 = POI(H, Point(1, 29))
 H9 = POI(H, Point(29, 1))
 H10 = POI(H, Point(24, 29))
 
-#Create POI table and populate it
+# Populate table with location data
 DB.tables[table_name].addValToKey(A.pCode, A1)
 DB.tables[table_name].addValToKey(A.pCode, A2)
 DB.tables[table_name].addValToKey(A.pCode, A3)
@@ -90,9 +103,26 @@ DB.tables[table_name].addValToKey(H.pCode, H8)
 DB.tables[table_name].addValToKey(H.pCode, H9)
 DB.tables[table_name].addValToKey(H.pCode, H10)
 
+
+###########################
+#     2: Constraints      #
+###########################
+csp = CSP('csp1')
+
+con1 = Constraint('con1', A, C, True) # ATM immediately before Coffee (NEED MONEY!)
+csp.addConstraint(con1)
+con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
+csp.addConstraint(con2)
+
+
+###########################
+#     3: Obstacles        #
+###########################
+
+# Generate obstacles for the map
 obs_list = []
-''' '''
-# BIG WALL	
+
+# Donald Trump's Great Wall	
 wall_y = 21
 for i in range(0,21):
 	obs_list.append((i,wall_y))
@@ -101,53 +131,50 @@ wall_x = 20
 for i in range(1,21):
 	obs_list.append((wall_x,i))
 
-
-'''
-# SMALL WALL	
-wall_y = 7
-for i in range(0,7):
-	obs_list.append((i,wall_y))
-
-wall_x = 7
-for i in range(1,7):
-	obs_list.append((wall_x,i))
-'''
-
-#obs_list = [(28,28),(27,28),(28,27),(29,27)]
-
 obs_list = tuple(obs_list)
 
-wp_map_1 = WaypointMapState("START", 0, None, 30, 30, # Dimensions
+###########################
+#    4: WaypointMap       #
+###########################
+wp_map = WaypointMapState("START", 0, None, 30, 30, # Dimensions
 							(0,0), # Initial Position 
 							(29,29), # Desired Position 
-							DB.tables[table_name], # Dict of POI... Needs thinking about...
-							#frozenset(((2,4),(3,3))) # Obstacles
-							frozenset(())
+							DB.tables[table_name], # Table
+							frozenset( obs_list ), # Obstacles
 							)
 
-wp_map_2 = WaypointMapState("START", 0, None, 30, 30, # Dimensions
-							(0,0), # Initial Position 
-							(29,29), # Desired Position 
-							DB.tables[table_name], # Dict of POI... Needs thinking about...
-							frozenset(( obs_list ))
-							)	
-
-wp_map = wp_map_2
-
+# Print the initial map
 wp_map.print_state()
 
-init_node = makeNode(table, [A.pCode, H.pCode, L.pCode, C.pCode])
-#init_node = makeNode(table, [])
+###########################
+#    4: Find T_50         #
+###########################
 
+# Before running the SA algorithm, we need to come up with 
+# some value for the initial temperature T_0. Based on the word of my 
+# structural mechanics professor (Prasanth Nair), we want to choose
+# T_0 such that the probability of accepting a bad solution is about 
+# 50%. 
+
+# To find this value (which will be HIGHLY problem specific) we will simply 
+# test a range of different initial temperatures and roughly calculate the 
+# rejection probability after performing a large number of trials. 
+search_poi_codes = [A.pCode, H.pCode, L.pCode, C.pCode]
+test_T50 = False
+
+# Remember that T_50 is Map and Table specific! 
+if test_T50:
+	T_test = list(np.arange(5,40,1))
+	iters = 10
+	T_50 = findT50(table, wp_map, T_test, search_poi_codes, iters)
+else: T_50 = 24 # Found from previous experiments
+
+
+sys.exit(0)
+
+
+init_node = makeNode(table, search_poi_codes)
 init_node.score, init_path = waypoint_search(wp_map, init_node) 
-
-
-csp = CSP('csp1')
-
-con1 = Constraint('con1', A, C, True) # ATM immediately before coffee
-csp.addConstraint(con1)	
-con2 = Constraint('con2', L, H, True) # Library at least before Hotdog
-csp.addConstraint(con2)
 
 
 '''
