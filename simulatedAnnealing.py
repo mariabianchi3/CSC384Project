@@ -12,20 +12,14 @@ from visualization_helpers import *
 
 # Perform search with simulated annealing.
 # TODO: Make sure user inputs make sense / we have all that we want
-def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):	
+def searchSimulatedAnnealing(wp_map, init_node, csp, T_0, iter_max):	
 	###########################################################
 	# Step 1: Initialize all algorithm specific parameters	#
 	###########################################################
 	
 	# TODO: We need to decide which of these are user controlled, and which 
 	#	   we fix. 
-	mutation_type_prob = 0.5 # Equal probability of both mutations occuring
-	# This is a probability in (0,100). Closer to 100 corresponds to a "hotter"
-	# initial temperature, while closer to 0 corresponds to a "colder" initial
-	# temperature
-	# TODO: Explain the math behind this better
-	temp_shape_param = 70
-	T_0 = - np.mean((wp_map.width, wp_map.height)) / np.log(temp_shape_param / 100)
+	mutation_type_prob = 0.2 # Equal probability of both mutations occuring
 	
 	###########################################################
 	# Step 2: Initialize saved information + file output	  #
@@ -48,8 +42,8 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, iter_max):
 		
 		# Straight Line
 		#T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
-		c = 1.125
-		T_cur = schedule(T_0, c, i/10)
+		c = 0.996
+		T_cur = schedule(T_0, c, i)
 
 		# Now mutate the parent node
 		child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)

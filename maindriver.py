@@ -170,36 +170,14 @@ if test_T50:
 else: T_50 = 24 # Found from previous experiments
 
 
-sys.exit(0)
-
-
 init_node = makeNode(table, search_poi_codes)
 init_node.score, init_path = waypoint_search(wp_map, init_node) 
 
 
-'''
-print("Initial Node")
-print("===========================================================")
-print(init_node)
-print("\nType 1 Mutated Node")
-print("===========================================================")
-print(randomMutation(table, init_node, 1))
-print("\nType 2 Mutated Node")
-print("===========================================================")
-print(randomMutation(table, init_node, 0))
-'''
-
 #print("\nSimulated Annealing Test Run")	
 #print("===========================================================")
-best_node = searchSimulatedAnnealing(wp_map, init_node, csp, 300)
+best_node = searchSimulatedAnnealing(wp_map, init_node, csp, T_50, 1000)
 
 print(best_node)
-
-#print("\nDatabase Visualization")
-#print("======================================================")
-#print(DB)
-#print("\nRandomized POI Auto-generation")
-#print("======================================================")
-#print(generateRandomPOIs(DB.tables["Places"], 1, 1000))
 
 #searchBruteForce(table, wp_map, [H, C, L])
