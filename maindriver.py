@@ -177,19 +177,28 @@ init_node.score, init_path = waypoint_search(wp_map, init_node)
 
 print(init_node)
 
-start_bf = time.time()
-searchBruteForce(table, wp_map, csp)
-end_bf = time.time()
+#start_bf = time.time()
+#searchBruteForce(table, wp_map, csp)
+#end_bf = time.time()
 
-print('Time Elapsed (BF Method): ', end_bf-start_bf)
+#print('Time Elapsed (BF Method): ', end_bf-start_bf)
 
-sys.exit(0)
+T_0 = T_50
+T_f = 0.01
+c = 0.95
+p_mut = 0.2
+iter_max = 1000
+best_node = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
 
+#target = open('MATLAB/simulated_annealing_output.txt', 'w')
 
-#print("\nSimulated Annealing Test Run")	
-#print("===========================================================")
-best_node = searchSimulatedAnnealing(wp_map, init_node, csp, T_50, 1000)
+# Log information to file
+#output_data = [i, T_cur, delta_E, p_accept, parent_node.score, best_node.score]
+#str_out = '\t'.join(map(str, output_data)) + '\n' 
+#target.write(str_out)
 
 print(best_node)
+
+sys.exit(0)
 
 #searchBruteForce(table, wp_map, [H, C, L])

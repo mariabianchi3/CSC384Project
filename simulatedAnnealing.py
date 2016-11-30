@@ -13,48 +13,37 @@ from visualization_helpers import *
 
 # Perform search with simulated annealing.
 # TODO: Make sure user inputs make sense / we have all that we want
-def searchSimulatedAnnealing(wp_map, init_node, csp, T_0, iter_max):	
+def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_max):	
 	###########################################################
-	# Step 1: Initialize all algorithm specific parameters	#
+	# Step 1: Initialize all algorithm specific parameters	  #
 	###########################################################
 	
-	# TODO: We need to decide which of these are user controlled, and which 
-	#	   we fix. 
-	mutation_type_prob = 0.2 # Equal probability of both mutations occuring
-	
+		
 	###########################################################
 	# Step 2: Initialize saved information + file output	  #
 	###########################################################
 	best_node = copy.deepcopy(init_node)
 	best_score, best_steps = waypoint_search(wp_map, best_node) # Need to load it with a score
+	best_node.map_states = best_steps
 	
 	parent_node = copy.deepcopy(init_node)
-	target = open('MATLAB/simulated_annealing_output.txt', 'w')
-	
+
+	# Initialize current temp
+	i = 0
+	T_cur = schedule(T_0, c, i)
+		
 	###########################################################
 	# Step 3: Iterate iter_max times and perform search	  	  #
 	###########################################################
-	for i in range(0, iter_max):
-		# Current temperature
-		# TODO: Should this be a user defined function passed in? 
-		#	   Problem with this is that it needs to go to zero at iter_max
-		#	   So I'm not too sure if it's a smart idea to let the user play 
-		#	   with this...
-		
-		# Straight Line
-		#T_cur = T_0 * (1 - i/iter_max) # Currently straight-line decrease
-		c = 0.996
-		T_cur = schedule(T_0, c, i)
+	while T_cur > T_f:
 
 		# Now mutate the parent node
-		child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
+		child_node = randomMutation(wp_map.table, parent_node, p_mut)
 		
 		# Keep mutating until it is valid
 		# TODO: This isn't terribly smart but it'll work...
 		while not csp.checkAllCons(child_node):
-			child_node = randomMutation(wp_map.table, parent_node, mutation_type_prob)
-				
-		# TODO: Add constraint checking portion!!!
+			child_node = randomMutation(wp_map.table, parent_node, p_mut)
 		
 		# Calculate energies
 		# TODO: Perhaps this function isn't really aptly named. Change? 
@@ -83,14 +72,16 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, T_0, iter_max):
 		if parent_node.score < best_node.score:
 			best_node = copy.deepcopy(parent_node)
 			
-		# Log information to file
-		output_data = [i, T_cur, delta_E, p_accept, parent_node.score, best_node.score]
-		str_out = '\t'.join(map(str, output_data)) + '\n' 
-		target.write(str_out)
-		
 		# Print Progress to Terminal
-		printProgress(i, iter_max-1, 'Running SA Algorithm')
+		printProgress(i, int(np.log(T_f/T_0)/np.log(c)), 'Running SA Algorithm')
 		
+		# Increase counter and update current temperature
+		i = i + 1
+		T_cur = schedule(T_0, c, i)
+		
+		# Exit condition
+		if i > iter_max: break
+
 	# Algorithm is complete. Return best node found so far
 	print("\n================ DONE!!! =======================\n")
 	
