@@ -208,52 +208,41 @@ c = 0.95
 p_mut = 0.2
 iter_max = 1000
 c_iters = 5
+c_vect = [0.7, 0.8, 0.9]
 
-score_file = "score_matrix_c_" + str(c) + ".txt"
-runtime_file = "run_data_c_" + str(c) + ".txt"
+for c in c_vect:
+	score_file = "score_matrix_c_" + str(c) + ".txt"
+	runtime_file = "run_data_c_" + str(c) + ".txt"
 
-mtrx = []
-pLength = []
-rTime = []
+	mtrx = []
+	pLength = []
+	rTime = []
 
-for i in range(c_iters):
-	start = time.time()
-	best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
-	end = time.time()
+	for i in range(c_iters):
+		start = time.time()
+		best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
+		end = time.time()
 	
-	mtrx.append(score_vector)
+		mtrx.append(score_vector)
 
-	pLength.append(best_node.score)
-	rTime.append(end-start)
+		pLength.append(best_node.score)
+		rTime.append(end-start)
 	
-	builtins.solved_paths = {} # Reset cache
+		builtins.solved_paths = {} # Reset cache
 	
-scoreMtrx = np.matrix(mtrx)
-scoreMtrx = scoreMtrx.transpose()
+	scoreMtrx = np.matrix(mtrx)
+	scoreMtrx = scoreMtrx.transpose()
 
-analyticMtrx = np.matrix([pLength, rTime])
-analyticMtrx = analyticMtrx.transpose()
+	analyticMtrx = np.matrix([pLength, rTime])
+	analyticMtrx = analyticMtrx.transpose()
 
-with open(full_path + "/" + score_file, "wb") as f:
-	for row in scoreMtrx:
-		np.savetxt(f, row, fmt="%d")
+	with open(full_path + "/" + score_file, "wb") as f:
+		for row in scoreMtrx:
+			np.savetxt(f, row, fmt="%d")
 		
-with open(full_path + "/" + runtime_file, "wb") as f:
-	for row in analyticMtrx:
-		np.savetxt(f, row, fmt="%.2f")
-
-#runtime_target = open(full_path + "/" + runtime_file, "w")
-	
-
-#target = open('MATLAB/simulated_annealing_output.txt', 'w')
-
-# Log information to file
-#output_data = [i, T_cur, delta_E, p_accept, parent_node.score, best_node.score]
-#str_out = '\t'.join(map(str, output_data)) + '\n' 
-#target.write(str_out)
-
-print(best_node)
+	with open(full_path + "/" + runtime_file, "wb") as f:
+		for row in analyticMtrx:
+			np.savetxt(f, row, fmt="%.2f")
 
 sys.exit(0)
 
-#searchBruteForce(table, wp_map, [H, C, L])
