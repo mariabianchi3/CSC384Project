@@ -9,7 +9,9 @@ from wp_search_helpers import *
 from NameGenerator import *
 from visualization_helpers import *
 
+import os
 import sys
+import datetime
 import numpy as np
 import time
 import builtins
@@ -183,12 +185,48 @@ print(init_node)
 
 #print('Time Elapsed (BF Method): ', end_bf-start_bf)
 
+###########################
+#    5: File Operations   #
+###########################
+score_folder = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
+base_path = os.path.dirname(__file__)
+full_path = os.path.abspath(os.path.join(base_path, "MATLAB/Experiments/" + score_folder))
+
+if not os.path.exists(full_path):
+	os.makedirs(full_path)
+
+
+###########################
+#    6: Run SimAnneal     #
+###########################
+
+
 T_0 = T_50
 T_f = 0.01
 c = 0.95
 p_mut = 0.2
 iter_max = 1000
-best_node = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
+c_iters = 5
+
+score_file = "score_matrix_c_" + str(c) + ".txt"
+runtime_file = "run_data_c_" + str(c) + ".txt"
+
+mtrx = []
+
+for i in range(c_iters):
+	best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
+	mtrx.append(score_vector)
+	builtins.solved_paths = {} # Reset cache
+	
+npMtrx = np.matrix(mtrx)
+npMtrx = npMtrx.transpose()
+
+with open(full_path + "/" + score_file, "wb") as f:
+	for row in npMtrx:
+		np.savetxt(f, row, fmt="%d")
+
+#runtime_target = open(full_path + "/" + runtime_file, "w")
+	
 
 #target = open('MATLAB/simulated_annealing_output.txt', 'w')
 

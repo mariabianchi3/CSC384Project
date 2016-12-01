@@ -25,12 +25,15 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_ma
 	best_node = copy.deepcopy(init_node)
 	best_score, best_steps = waypoint_search(wp_map, best_node) # Need to load it with a score
 	best_node.map_states = best_steps
+	best_node.score = best_score
 	
 	parent_node = copy.deepcopy(init_node)
 
 	# Initialize current temp
 	i = 0
 	T_cur = schedule(T_0, c, i)
+	
+	score_vector = []
 		
 	###########################################################
 	# Step 3: Iterate iter_max times and perform search	  	  #
@@ -68,6 +71,9 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_ma
 		# Update parent_node appropriately
 		parent_node = np.random.choice([child_node, parent_node], 1, False, [p_accept, 1-p_accept])[0]
 		
+		#Log iteration score
+		score_vector.append(parent_node.score)
+		
 		# Save best parent_node so far
 		if parent_node.score < best_node.score:
 			best_node = copy.deepcopy(parent_node)
@@ -88,7 +94,7 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_ma
 	for state in best_node.map_states:
 		state.print_full_path()
 		
-	return best_node
+	return best_node, score_vector
 
 # The schedule function returns the current temperature 
 # given some cooling parameter 'c' and the current time 't'
