@@ -11,6 +11,7 @@ from visualization_helpers import *
 
 import os
 import sys
+import timeit
 import datetime
 import numpy as np
 import time
@@ -212,18 +213,34 @@ score_file = "score_matrix_c_" + str(c) + ".txt"
 runtime_file = "run_data_c_" + str(c) + ".txt"
 
 mtrx = []
+pLength = []
+rTime = []
 
 for i in range(c_iters):
+	start = time.time()
 	best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
+	end = time.time()
+	
 	mtrx.append(score_vector)
+
+	pLength.append(best_node.score)
+	rTime.append(end-start)
+	
 	builtins.solved_paths = {} # Reset cache
 	
-npMtrx = np.matrix(mtrx)
-npMtrx = npMtrx.transpose()
+scoreMtrx = np.matrix(mtrx)
+scoreMtrx = scoreMtrx.transpose()
+
+analyticMtrx = np.matrix([pLength, rTime])
+analyticMtrx = analyticMtrx.transpose()
 
 with open(full_path + "/" + score_file, "wb") as f:
-	for row in npMtrx:
+	for row in scoreMtrx:
 		np.savetxt(f, row, fmt="%d")
+		
+with open(full_path + "/" + runtime_file, "wb") as f:
+	for row in analyticMtrx:
+		np.savetxt(f, row, fmt="%.2f")
 
 #runtime_target = open(full_path + "/" + runtime_file, "w")
 	
