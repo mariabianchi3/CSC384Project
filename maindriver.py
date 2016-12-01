@@ -117,8 +117,8 @@ csp = CSP('csp1')
 
 con1 = Constraint('con1', A, C, False) # ATM at least before Coffee (NEED MONEY!)
 csp.addConstraint(con1)
-#con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
-#csp.addConstraint(con2)
+con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
+csp.addConstraint(con2)
 
 
 ###########################
@@ -196,19 +196,17 @@ full_path = os.path.abspath(os.path.join(base_path, "MATLAB/Experiments/" + scor
 if not os.path.exists(full_path):
 	os.makedirs(full_path)
 
-
 ###########################
 #    6: Run SimAnneal     #
 ###########################
-
 
 T_0 = T_50
 T_f = 0.01
 c = 0.95
 p_mut = 0.2
 iter_max = 1000
-c_iters = 5
-c_vect = [0.7, 0.8, 0.9]
+c_iters = 10
+c_vect = [0.6, 0.7, 0.8, 0.9, 0.95]
 
 for c in c_vect:
 	score_file = "score_matrix_c_" + str(c) + ".txt"

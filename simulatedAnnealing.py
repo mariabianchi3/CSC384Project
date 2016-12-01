@@ -91,6 +91,11 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_ma
 	# Algorithm is complete. Return best node found so far
 	print("\n================ DONE!!! =======================\n")
 	
+	print("Best Node Found: \n")
+	print(best_node)
+	
+	print("\nOptimal Path Visualization\n")
+	
 	for state in best_node.map_states:
 		state.print_full_path()
 		

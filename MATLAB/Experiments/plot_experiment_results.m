@@ -2,7 +2,9 @@ close all;
 clear all;
 clc;
 
-folder = '2016_11_30_21:14:11';
+folder = '2016_12_01_12:37:09';
+
+%folder = '2016_12_01_12:37:09'; REALLY GOOD RESULTS!
 
 directory = dir(folder);
 
@@ -19,7 +21,7 @@ for i = 3:length(directory)
     file_name_split = strsplit(file_name, '_');
     
     % Handle score matrix files!
-    if strcmp(file_name_split(1), 'score_')
+    if strcmp(file_name_split(1), 'score')
         grey_val = 200;
 
         data = load([folder '/' file_name]);
@@ -44,16 +46,16 @@ for i = 3:length(directory)
         plot(iters, up, 'b', 'LineWidth', 1);
         plot(iters, down, 'r', 'LineWidth', 1);
         plot(iters, data_mean, 'k', 'LineWidth', 1);
-        xlabel('Iteration Number');
-        ylabel('Score');
+        xlabel('Iteration Number','FontSize',15);
+        ylabel('Score','FontSize',15);
         c_str = char(file_name_split(end));
         c_str = c_str(1:end-4);
-        title(['Convergence Trend for c = ' c_str]);
+        title(['Convergence Trend for c = ' c_str],'FontSize',18);
                 
         % Save out convergence figure
         saveas(gcf, [folder '/SA_convergence_c_' c_str '.pdf']);
         pause(0.1)
-        close all;
+        %close all;
     end
     
     % Now handle loading runtime stat files
@@ -82,11 +84,13 @@ fh = herrorbar(c_times_mean, c_scores_mean, c_times_std);
 set(fh(2), 'LineStyle', 'none');
 
 for i = 1:length(c_vals)
-    text(c_times_mean(i)+0.05,c_scores_mean(i)+5,sprintf('c = %0.2f',c_vals(i)), ...
+    text(c_times_mean(i),c_scores_mean(i),sprintf('c = %0.2f',c_vals(i)), ...
         'HorizontalAlignment', 'left', ...
         'VerticalAlignment', 'bottom');
 end
 
-xlabel('Experiment Run Time - [s]');
-ylabel('Average Returned Path Length');
-title('SA Path Length with Algorithm Runtime');
+xlabel('Experiment Run Time - [s]','FontSize',15);
+ylabel('Average Returned Path Length','FontSize',15);
+title('SA Path Length with Algorithm Runtime','FontSize',18);
+
+saveas(gcf, [folder '/runtime_data_c.pdf']);
