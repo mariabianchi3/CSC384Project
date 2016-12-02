@@ -113,12 +113,12 @@ DB.tables[table_name].addValToKey(H.pCode, H10)
 ###########################
 #     2: Constraints      #
 ###########################
-csp = CSP('csp1')
+con_set = ConstraintSet('con_set1')
 
 con1 = Constraint('con1', A, C, False) # ATM at least before Coffee (NEED MONEY!)
-csp.addConstraint(con1)
+con_set.addConstraint(con1)
 con2 = Constraint('con2', L, C, False) # Library at least before Coffee (can't drink in library)
-csp.addConstraint(con2)
+con_set.addConstraint(con2)
 
 
 ###########################
@@ -181,7 +181,7 @@ init_node.score, init_path = waypoint_search(wp_map, init_node)
 print(init_node)
 
 #start_bf = time.time()
-#searchBruteForce(table, wp_map, csp)
+#searchBruteForce(table, wp_map, con_set)
 #end_bf = time.time()
 
 #print('Time Elapsed (BF Method): ', end_bf-start_bf)
@@ -218,7 +218,7 @@ for c in c_vect:
 
 	for i in range(c_iters):
 		start = time.time()
-		best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_50, T_f, c, iter_max)
+		best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, con_set, p_mut, T_50, T_f, c, iter_max)
 		end = time.time()
 	
 		mtrx.append(score_vector)

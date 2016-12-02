@@ -19,9 +19,9 @@ import numpy as np
 class Point:
 	def __init__(self, *args):
 		'''
-		@param x: x coordinate
-		@param y: y coordinate
-		@param z: z coordinate
+		:param x: x coordinate
+		:param y: y coordinate
+		:param z: z coordinate
 		'''
 		#Exception handling
 		if len(args) < 2 or len(args) > 3:
@@ -45,15 +45,15 @@ class Point:
 	def toList(self):
 		return list((self.x, self.y)) if self.z == None else list((self.x, self.y, self.z))
 	
-	def __hash__(self):
-		return hash((self.x, self.y, self.z))
-	
 	#Enables equivalence checking (i.e. == and != comparison of Point objects)
 	def __eq__(self, other):
 		return self.x == other.x and self.y == other.y and self.z == other.z
 	
 	def __ne__(self, other):
 		return not self.__eq__(other)
+	
+	def __hash__(self):
+		return hash((self.x, self.y, self.z))
 	
 	#Enables human readable object representation
 	def __str__(self):
@@ -160,15 +160,15 @@ class POI(Waypoint):
 			self.name = location.name
 		self.location = location
 	
-	def __hash__(self):
-		return hash((self.name, self.location, self.position))
-	
 	#Enables equivalence checking (i.e. == and != comparison of POI objects)	
 	def __eq__(self, other):
 		return self.location == other.location and Waypoint.__eq__(self, other)
 	
 	def __ne__(self, other):
 		return not self.__eq__(other)
+	
+	def __hash__(self):
+		return hash((self.name, self.location, self.position))
 
 	#Enables human readable object representation
 	def __str__(self):
@@ -217,7 +217,6 @@ class Place:
 	def __ne__(self, other):
 		return not self.__eq__(other)
 	
-	
 	def __hash__(self):
 		return hash((self.pType, self.pCode, self.pDesc))
 	
@@ -260,7 +259,7 @@ class Location(Place):
 			self.pCode = args[0].pCode
 			self.pDesc = args[0].pDesc
 		
-	
+	#Enables equivalence checking (i.e. == and != comparison of Location objects)
 	def __eq__(self, other):
 		return self.name == other.name and Place.__eq__(self, other)
 	
@@ -270,6 +269,7 @@ class Location(Place):
 	def __hash__(self):
 		return hash((self.name, self.pType, self.pCode, self.pDesc))
 	
+	#Enables human readable object representation
 	def __str__(self):
 		return str(self.pType) + " - " + str(self.name) 
 	
@@ -308,6 +308,7 @@ class Node:
 		self.map_states = [] # Initialize as empty
 		self.score = float('inf')
 	
+	#Specific bulk parameter retrieval functions
 	def names(self):
 		return [poi.location.name for poi in self.pois]
 	
@@ -360,11 +361,21 @@ class Constraint:
 		self.var2 = var2
 		self.immediate = immediate
 	
+	#Specific data retrieval functions
 	def getScope(self):
 		return list(self.var1, self.var2)
 	
 	def getConstraintStrength(self):
 		return "Strong" if self.immediate else "Weak"
+	
+	#Node validation
+	def isValidNode(self, node):
+		locations = [poi.location for poi in node.pois]
+		
+		var1_ind = locations.index(self.var1)
+		var2_ind = locations.index(self.var2)
+		
+		return (var1_ind < var2_ind and not self.immediate) or (var2_ind-var1_ind == 1 and self.immediate)
 	
 	#Enables equivalence checking (i.e. == and != comparison of Node objects)
 	def __eq__(self, other):
@@ -383,43 +394,37 @@ class Constraint:
 	def __repr__(self):
 		return str(self)
 
-	def isValidNode(self, node):
-		locations = [poi.location for poi in node.pois]
-		
-		var1_ind = locations.index(self.var1)
-		var2_ind = locations.index(self.var2)
-		
-		return (var1_ind < var2_ind and not self.immediate) or (var2_ind-var1_ind == 1 and self.immediate)  		
-
 '''
 	Class:
-		CSP
+		ConstraintSet
 	
 	Description:
 		Container for all constraints
 	
 	Notes:
-		Again using Borg since we only want a single CSP for the current map and db
+		Again using Borg since we only want a single ConstraintSet for the current map and db
 		
 '''
-class CSP:
+class ConstraintSet:
 	_cons = []
 	def __init__(self, name):
 		self.cons = self._cons
 	
+	#Adds a constraint to the ConstraintSet
 	def addConstraint(self, con):
 		self.cons.append(con)
 	
+	#Retrieve all constraints from ConstraintSet
 	def getAllConstraints(self):
 		return self.cons
 	
-	# Check a node against all constraints in the CSP
+	# Check a node against all constraints in the ConstraintSet
 	def checkAllCons(self, node):
 		for con in self.cons:
 			if not con.isValidNode(node): return False
 		return True
 		
-	
+	#Wipes out the shared state of the ConstraintSet, used for restarting
 	def _dropCSP(self):
 		while self.cons != []:
 			del self.cons[0]

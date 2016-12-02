@@ -13,7 +13,7 @@ from visualization_helpers import *
 
 # Perform search with simulated annealing.
 # TODO: Make sure user inputs make sense / we have all that we want
-def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_max):	
+def searchSimulatedAnnealing(wp_map, init_node, con_set, p_mut, T_0, T_f, c, iter_max):	
 	###########################################################
 	# Step 1: Initialize all algorithm specific parameters	  #
 	###########################################################
@@ -45,7 +45,7 @@ def searchSimulatedAnnealing(wp_map, init_node, csp, p_mut, T_0, T_f, c, iter_ma
 		
 		# Keep mutating until it is valid
 		# TODO: This isn't terribly smart but it'll work...
-		while not csp.checkAllCons(child_node):
+		while not con_set.checkAllCons(child_node):
 			child_node = randomMutation(wp_map.table, parent_node, p_mut)
 		
 		# Calculate energies
@@ -151,7 +151,7 @@ def findT50(table, wp_map, T_test, search_poi_codes, iters):
 	return T_50
 			
 # Brute force searchd
-def searchBruteForce(table, wp_map, csp, types = None):
+def searchBruteForce(table, wp_map, con_set, types = None):
 	
 	# First grab all of the keys
 	if not types:
@@ -187,7 +187,7 @@ def searchBruteForce(table, wp_map, csp, types = None):
 			# only.	
 			if valid_ordering:
 				pass
-			elif not csp.checkAllCons(node):
+			elif not con_set.checkAllCons(node):
 				break
 			else: valid_ordering = True
 						
