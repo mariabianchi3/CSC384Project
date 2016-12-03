@@ -2,11 +2,9 @@
 #	TEST AUTOMATION															  #
 ###############################################################################
 
-#################################
-#          Imports              #
-#################################
-#TODO: If we want to use this module then check that all necessary imports are
-#      placed here!
+from poiDB import *
+from poi_base import *
+from NameGenerator import *
 
 #Generate random place types
 def generateRandomPlaceTypes(numOfTypes):

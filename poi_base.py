@@ -38,7 +38,7 @@ class Point:
 		else:
 			self.z = None
 	
-	#Conversion functions for other functions that do not take in Point objects
+	#Conversion functions for processes that do not understand Point objects
 	def toTuple(self):
 		return tuple((self.x, self.y)) if self.z == None else tuple((self.x, self.y, self.z))
 	
@@ -95,7 +95,7 @@ class Waypoint:
 		#Exception handling			
 		if (type(args[0]) == str or type(args[i]) == int or type(args[i]) == tuple):
 			if (dim < 2 or dim > 3):
-				raise Exception("Waypoints must be defined by at least 2D or 3D coordinates\n")
+				raise Exception("Waypoints must be defined by either 2D or 3D coordinates\n")
 		
 		if (type(args[i]) != int) and (type(args[i]) != Point) and (type(args[i]) != tuple):
 			raise Exception("Waypoints only take a Point, tuple or integers for position\n")
@@ -192,7 +192,9 @@ class POI(Waypoint):
 		information.
 	
 	Notes:
-		
+		1) Abstraction to Location for more granular control of data (we could
+		   define that coffee shops exist, but we may not know which ones
+		   specifically, i.e. Starbucks, Tims, etc.)
 '''
 class Place:
 	def __init__(self, pType, pCode, pDesc=''):
@@ -201,6 +203,7 @@ class Place:
 		@param pCode: Single letter code for place type used for map representation
 		@param description: Generic description of place type (Optional)
 		'''
+		#Ensure everything passed in is of type str
 		if type(pType) != str or type(pCode) != str or type(pDesc) != str:
 			raise Exception("pType, pCode, and (if provided) pDesc must be of type str")
 		
@@ -368,7 +371,7 @@ class Constraint:
 	def getConstraintStrength(self):
 		return "Strong" if self.immediate else "Weak"
 	
-	#Node validation
+	#Checks if locations are in correct order according to constraint
 	def isValidNode(self, node):
 		locations = [poi.location for poi in node.pois]
 		

@@ -120,7 +120,6 @@ def findT50(table, wp_map, T_test, search_poi_codes, iters):
 	
 		p_vect = []
 		for i in range(iters):
-			# TODO: Ensure that makeNode is RANDOM!!!
 			parent_node = makeNode(table, search_poi_codes)
 			child_node = randomMutation(table, parent_node) # Use default p=0.2
 			

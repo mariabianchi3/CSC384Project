@@ -161,7 +161,7 @@ class Database:
 	def fromKeyInTableGetVals(self, key, tabName):
 		return list(self.tables[tabName].data[key])
 
-	#Get all keys that have specificied value in specified table
+	#Get all keys that have specified value in specified table
 	def fromValGetKeysInTable(self, val, tabName):
 		values = list(self.tables[tabName].data.values())
 		keyIndices = []
@@ -180,9 +180,10 @@ class Database:
 
 	#Destroys all tables and resets the shared state of the db to a blank OrderedDict()
 	def _dropCascade(self):		
-		#drop all tables so they don't linger in memory
 		i = 0
 		tables = list(self.tables.keys())
+		
+		#drop all tables so they don't linger in memory
 		while i < len(tables):
 			print(i)
 			self.dropTable(tables[i])
