@@ -2,6 +2,16 @@ import numpy as np
 
 from collections import OrderedDict
 
+###############################################################################
+'''
+	Pseudo-Database class definitions
+	
+	Classes:
+		Table		(ln 29)
+		Database	(ln 137)
+'''
+###############################################################################
+
 '''
 	Class: Table
 	

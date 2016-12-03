@@ -3,6 +3,16 @@ import numpy as np
 ###############################################################################
 ''' 
 	Basic class definitions that will be used in the Waypoint search project
+	
+	Classes:
+		Point			(ln 29)
+		Waypoint		(ln 88)
+		POI				(ln 151)
+		Place			(ln 209)
+		Location		(ln 259)
+		Node			(ln 313)
+		Constraint		(ln 370)
+		ConstraintSet	(ln 421)
 '''
 ###############################################################################
 
