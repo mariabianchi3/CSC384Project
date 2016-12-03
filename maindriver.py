@@ -180,11 +180,15 @@ init_node.score, init_path = waypoint_search(wp_map, init_node)
 
 print(init_node)
 
-#start_bf = time.time()
-#searchBruteForce(table, wp_map, con_set)
-#end_bf = time.time()
+test_bf = False
 
-#print('Time Elapsed (BF Method): ', end_bf-start_bf)
+if test_bf:
+	start_bf = time.time()
+	searchBruteForce(table, wp_map, con_set)
+	end_bf = time.time()
+
+	print('Time Elapsed (BF Method): ', end_bf-start_bf)
+
 
 ###########################
 #    5: File Operations   #
