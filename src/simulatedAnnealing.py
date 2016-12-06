@@ -8,7 +8,6 @@ from poi_base import *
 from poiDB import *
 from wp_search import *
 from wp_search_helpers import *
-from NameGenerator import *
 from visualization_helpers import *
 
 # Perform search with simulated annealing.

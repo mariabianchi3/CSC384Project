@@ -6,7 +6,6 @@ from poi_base import *
 from poiDB import *
 from wp_search import *
 from wp_search_helpers import *
-from NameGenerator import *
 from visualization_helpers import *
 
 import os
@@ -195,7 +194,7 @@ if test_bf:
 ###########################
 score_folder = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
 base_path = os.path.dirname(__file__)
-full_path = os.path.abspath(os.path.join(base_path, "MATLAB/Experiments/" + score_folder))
+full_path = os.path.abspath(os.path.join(base_path, "../MATLAB/Experiments/" + score_folder))
 
 if not os.path.exists(full_path):
 	os.makedirs(full_path)
