@@ -4,36 +4,30 @@
 
 This is the repo for our Fall 2016 [CSC384] Final Project!
 
-We are interested in addressing the problem of constrained waypoint path
-optimization. Given a map with an initial and goal position, along with sets of
-waypoints, we are interested in finding the optimal ordering in which to visit
-the waypoints of interest that results in the shortest overall path. There may
-also exist constraints on the order in which certain waypoints must be visited. 
+All of our python files are located in the src folder.
 
-A simple example may be as follows. Say we want to walk from the Bahen Centre to
-Queen's park subway station, and along the way we want to stop at an ATM to
-withdraw money, a coffee shop to buy a drink, and a library to pick up a book.
-And we have the constraint that we want to visit the ATM _before_ the coffee
-shop so that we can have cash to purchase the drink. There may exist multiple ATM's, 
-coffee shops, and libraries that we can visit, so the question is which ATM,
-coffee shop, and library do we choose (from their respective sets) and in what
-order do we visit them? 
+You can run our code by executing maindriver.py. Make sure to maximize the terminal before executing.
+The following is a list of out python files and a description of what they contain
 
-It is immediately obvious that some solutions simply violate the constraints: 
+maindriver.py
+Builds the database, contraints and the map we used for the project and runs our simulated annealing algorithm
 
-Start -> Coffee Shop -> ATM -> Library -> End
+poiDB.py
 
-But others may not: 
+poi_base.py
 
-Start -> ATM -> Coffee Shop -> Library -> End
+search.py
 
-Start -> ATM -> Library -> Coffee Shop -> End
+simulatedAnnealing.py
 
-Additionally, the presence of multiple options (in a spatial sense) for each
-waypoint adds another dimension of complexity to the problem! Which is better? 
+testAutomation.py
 
-Start -> ATM(1) -> Coffee Shop -> Library -> End
+visualizationHelpers.py
 
-Start -> ATM(2) -> Coffee Shop -> Library -> End
+wp_search.py
+
+wp_search_helpers.py
+
+
 
 
