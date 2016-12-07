@@ -220,6 +220,7 @@ for c in c_vect:
 	rTime = []
 
 	for i in range(c_iters):
+		print('Testing c = {} | Iteration {} of {}'.format(c, i+1, c_iters))
 		start = time.time()
 		best_node, score_vector = searchSimulatedAnnealing(wp_map, init_node, con_set, p_mut, T_50, T_f, c, iter_max)
 		end = time.time()
